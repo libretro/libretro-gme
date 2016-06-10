@@ -29,7 +29,8 @@ void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_c
 unsigned retro_api_version(void) { return RETRO_API_VERSION; }
 unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
-short audio_buffer[2048];
+short audio_buffer[4096];
+
 unsigned short framebuffer[330*410];
 
 // Serialisation methods
@@ -67,8 +68,8 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
     int pixel_format = RETRO_PIXEL_FORMAT_RGB565;
 
     memset(info, 0, sizeof(*info));
-    info->timing.fps            = 50.0f;
-    info->timing.sample_rate    = 441000;
+    info->timing.fps            = 60.0f;
+    info->timing.sample_rate    = 44100;
     info->geometry.base_width   = 330;
     info->geometry.base_height  = 410;
     info->geometry.max_width    = 330;
@@ -95,6 +96,9 @@ void retro_init(void)
     //vectrex->Reset();
 }
 
+// End of retrolib
+void retro_deinit(void) {}
+
 // Reset the Vectrex
 void retro_reset(void) 
 { 
@@ -104,10 +108,9 @@ void retro_reset(void)
 // Run a single frames with out Vectrex emulation.
 void retro_run(void)
 {
+	audio_batch_cb(audio_buffer,1960);
 	handle_error( gme_play( emu, 2048, audio_buffer ) );
-	audio_batch_cb(audio_buffer,2048);
     video_cb(framebuffer, 330, 410, sizeof(unsigned short) * 330);
-
 }
 
 // File Loading
@@ -119,6 +122,7 @@ bool retro_load_game(const struct retro_game_info *info)
     if (info && info->data) { // ensure there is ROM data
 		handle_error( gme_open_file( info->path, &emu, sample_rate ) );
 		handle_error( gme_start_track( emu, track ) );
+		handle_error( gme_play( emu, 2048, audio_buffer ) );		
     }
     return true;
 }
@@ -136,6 +140,8 @@ void retro_unload_game(void)
 void handle_error( const char* error )
 {
 	char str [256];
-	sprintf( str, "Error: %s", error );
-	log_cb(RETRO_LOG_ERROR, str ); 
+	if(error) {
+		sprintf( str, "Error: %s", error );
+		log_cb(RETRO_LOG_ERROR, str ); 		
+	}
 }
