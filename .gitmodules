@@ -1,0 +1,3 @@
+[submodule "game-music-emu"]
+	path = game-music-emu
+	url = https://bitbucket.org/mpyne/game-music-emu.git

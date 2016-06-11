@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "libretro.h"
-#include "gme/gme.h"
+#include "gme.h"
 
 Music_Emu* emu;
 
@@ -31,7 +31,7 @@ unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
 short audio_buffer[4096];
 
-unsigned short framebuffer[330*410];
+unsigned short framebuffer[640*480f];
 
 // Serialisation methods
 size_t retro_serialize_size(void) { return 0; }
@@ -70,11 +70,11 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
     memset(info, 0, sizeof(*info));
     info->timing.fps            = 60.0f;
     info->timing.sample_rate    = 44100;
-    info->geometry.base_width   = 330;
-    info->geometry.base_height  = 410;
-    info->geometry.max_width    = 330;
-    info->geometry.max_height   = 410;
-    info->geometry.aspect_ratio = 330.0f / 410.0f;
+    info->geometry.base_width   = 640;
+    info->geometry.base_height  = 480;
+    info->geometry.max_width    = 640;
+    info->geometry.max_height   = 480;
+    info->geometry.aspect_ratio = 640.0f / 480.0f;
 
     environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
 }
@@ -83,34 +83,31 @@ void retro_init(void)
 {
     /* set up some logging */
     struct retro_log_callback log;
-    unsigned level = 4;
+    unsigned level = 1;
 
     if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
         log_cb = log.log;
     else
         log_cb = NULL;
-
     // the performance level is guide to frontend to give an idea of how intensive this core is to run
     environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
-
-    //vectrex->Reset();
 }
 
 // End of retrolib
 void retro_deinit(void) {}
 
-// Reset the Vectrex
+// Reset gme
 void retro_reset(void) 
 { 
 	
 }
 
-// Run a single frames with out Vectrex emulation.
+// Run a single frame
 void retro_run(void)
 {
 	audio_batch_cb(audio_buffer,1960);
 	handle_error( gme_play( emu, 2048, audio_buffer ) );
-    video_cb(framebuffer, 330, 410, sizeof(unsigned short) * 330);
+    video_cb(framebuffer, 640, 480, sizeof(unsigned short) * 640);
 }
 
 // File Loading
