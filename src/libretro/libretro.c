@@ -6,7 +6,7 @@
 #include "gme.h"
 
 Music_Emu* emu;
-
+unsigned int framecounter;
 void handle_error( const char* error );
 
 // Callbacks
@@ -31,7 +31,7 @@ unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
 short audio_buffer[4096];
 
-unsigned short framebuffer[640*480f];
+unsigned short framebuffer[640*480];
 
 // Serialisation methods
 size_t retro_serialize_size(void) { return 0; }
@@ -64,9 +64,7 @@ void retro_get_system_info(struct retro_system_info *info)
  * resolution of the display.
  */
 void retro_get_system_av_info(struct retro_system_av_info *info) {
-
     int pixel_format = RETRO_PIXEL_FORMAT_RGB565;
-
     memset(info, 0, sizeof(*info));
     info->timing.fps            = 60.0f;
     info->timing.sample_rate    = 44100;
@@ -74,7 +72,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
     info->geometry.base_height  = 480;
     info->geometry.max_width    = 640;
     info->geometry.max_height   = 480;
-    info->geometry.aspect_ratio = 640.0f / 480.0f;
+    info->geometry.aspect_ratio = 16.0f / 9.0f;
 
     environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
 }
@@ -84,13 +82,13 @@ void retro_init(void)
     /* set up some logging */
     struct retro_log_callback log;
     unsigned level = 1;
-
     if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
         log_cb = log.log;
     else
         log_cb = NULL;
     // the performance level is guide to frontend to give an idea of how intensive this core is to run
     environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
+	framecounter = 0;
 }
 
 // End of retrolib
@@ -105,9 +103,22 @@ void retro_reset(void)
 // Run a single frame
 void retro_run(void)
 {
+	char r,g,b;
+	unsigned short color;
+	memset(framebuffer,0,sizeof(unsigned short) * 640 * 480);
+	for(int i=0;i<(640*480);i++)
+	{
+		r = (i / 640 ) /15;
+		g = (i % 640) /20;
+		b = (framecounter % 64) > 31 ? (31 - (framecounter % 32)) : (framecounter % 32);
+		color = (r << 11) | (g << 5) | b;
+		framebuffer[i] = color;
+	}
+	//memset(framebuffer,color,640*480 * 2);	
 	audio_batch_cb(audio_buffer,1960);
 	handle_error( gme_play( emu, 2048, audio_buffer ) );
     video_cb(framebuffer, 640, 480, sizeof(unsigned short) * 640);
+	framecounter++;
 }
 
 // File Loading

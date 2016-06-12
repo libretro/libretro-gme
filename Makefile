@@ -68,8 +68,11 @@ all: $(EXECUTABLE)
     
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+
+install:
+	cp $(EXECUTABLE) /D/Emu/Retroarch/cores
 	
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
 
-.PHONY: clean
+.PHONY: clean install
