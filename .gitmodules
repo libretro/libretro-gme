@@ -1,3 +1,6 @@
 [submodule "game-music-emu"]
-	path = game-music-emu
+	path = deps/game-music-emu
 	url = https://bitbucket.org/mpyne/game-music-emu.git
+[submodule "deps/libarchive"]
+	path = deps/libarchive
+	url = https://github.com/larrykoubiak/libarchive.git

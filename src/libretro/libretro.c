@@ -56,7 +56,7 @@ void retro_get_system_info(struct retro_system_info *info)
     info->library_name = "Game Music Emulator";
     info->library_version = "1.0";
     info->need_fullpath = false;
-    info->valid_extensions = "nsf|spc";
+    info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz";
 }
 
 /*
@@ -72,7 +72,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
     info->geometry.base_height  = 480;
     info->geometry.max_width    = 640;
     info->geometry.max_height   = 480;
-    info->geometry.aspect_ratio = 16.0f / 9.0f;
+    info->geometry.aspect_ratio = 640.0f / 480.0f;
 
     environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
 }
