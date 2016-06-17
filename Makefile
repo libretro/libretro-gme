@@ -1,9 +1,9 @@
 CC = gcc
 CXX = g++
-INCFLAGS= -I. -I.src/libretro -Ideps/game-music-emu/gme
+INCFLAGS= -I. -Isrc/libretro -Ideps/game-music-emu/gme
 CFLAGS=-c -Wall $(INCFLAGS)
 CXXFLAGS=-c -Wall $(INCFLAGS)
-LDFLAGS= -shared
+LDFLAGS= -shared -L /mingw32/lib -lz
 
 EXECUTABLE= gme_libretro.dll
 
@@ -54,25 +54,39 @@ SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 			deps/game-music-emu/gme/Ym2413_Emu.cpp \
 			deps/game-music-emu/gme/Ym2612_Emu.cpp 
 
-SOURCES_C    := src/libretro/libretro.c
+SOURCES_C    := src/libretro/libretro.c \
+				src/libretro/compat/compat_fnmatch.c \
+				src/libretro/compat/compat_posix_string.c \
+				src/libretro/compat/compat_strcasestr.c \
+				src/libretro/compat/compat_strl.c \
+				src/libretro/file/archive_file_zlib.c \
+				src/libretro/file/archive_file.c \
+				src/libretro/file/retro_dirent.c \
+				src/libretro/file/retro_stat.c \
+				src/libretro/file/file_path.c \
+				src/libretro/lists/dir_list.c \
+				src/libretro/lists/file_list.c \
+				src/libretro/lists/string_list.c \
+				src/libretro/streams/file_stream.c
+				
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-all: $(EXECUTABLE)
+	$(CC) $(CFLAGS) -o $@ $<
     
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
 
+all: $(EXECUTABLE)
+
+clean:
+	rm -f $(OBJECTS) $(EXECUTABLE) src/test.o test.exe
+
 install:
 	cp $(EXECUTABLE) ../libretro-super/dist/cores
-	
-clean:
-	rm -f $(OBJECTS) $(EXECUTABLE)
 
-.PHONY: clean install
+.PHONY: clean install test

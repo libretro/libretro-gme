@@ -3,11 +3,15 @@
 #include <stdlib.h>
 
 #include "libretro.h"
+#include "file/archive_file.h"
+#include "lists/string_list.h"
 #include "gme.h"
+typedef struct string_list string_list;
 
 Music_Emu* emu;
 unsigned int framecounter;
 void handle_error( const char* error );
+void handle_info( const char* info);
 
 // Callbacks
 retro_log_printf_t log_cb;
@@ -17,7 +21,6 @@ static retro_input_state_t input_state_cb;
 static retro_environment_t environ_cb;
 static retro_audio_sample_t audio_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
-
 // libretro global setters
 void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
 void retro_set_input_poll(retro_input_poll_t cb) { input_poll_cb = cb; }
@@ -29,7 +32,7 @@ void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_c
 unsigned retro_api_version(void) { return RETRO_API_VERSION; }
 unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
-short audio_buffer[4096];
+short audio_buffer[8192];
 
 unsigned short framebuffer[640*480];
 
@@ -73,7 +76,6 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
     info->geometry.max_width    = 640;
     info->geometry.max_height   = 480;
     info->geometry.aspect_ratio = 640.0f / 480.0f;
-
     environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
 }
 
@@ -126,8 +128,16 @@ bool retro_load_game(const struct retro_game_info *info)
 {
 	long sample_rate = 44100;
 	int track = 0;
+	string_list *lstfiles; 
+	file_archive_transfer_t state;
+	char msg[255];
+	lstfiles = (string_list*)malloc(sizeof(string_list));
+	lstfiles = file_archive_get_file_list("C:\\UserTemp\\DMA\\Dev\\msys32\\home\\I36107\\libretro-gme\\test\\Final Fantasy 6 [ff6].zip",NULL);
 	
+	sprintf(msg,"%i files in archive",(size_t)lstfiles->size);
+	handle_info(msg);
     if (info && info->data) { // ensure there is ROM data
+
 		handle_error( gme_open_file( info->path, &emu, sample_rate ) );
 		handle_error( gme_start_track( emu, track ) );
 		handle_error( gme_play( emu, 2048, audio_buffer ) );		
@@ -151,5 +161,14 @@ void handle_error( const char* error )
 	if(error) {
 		sprintf( str, "Error: %s", error );
 		log_cb(RETRO_LOG_ERROR, str ); 		
+	}
+}
+
+void handle_info( const char* info )
+{
+	char str [256];
+	if(info) {
+		sprintf( str, "Info: %s", info );
+		log_cb(RETRO_LOG_INFO, str ); 		
 	}
 }
