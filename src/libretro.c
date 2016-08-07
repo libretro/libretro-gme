@@ -12,7 +12,6 @@ static uint16_t x=0;
 static uint16_t y=0;
 static uint16_t previnput;
 static bool is_playing;
-static int track;
 
 void handle_error( const char* error );
 void handle_info( const char* info);
@@ -107,11 +106,10 @@ void retro_reset(void)
 // Run a single frame
 void retro_run(void)
 {
-	unsigned short color;
 	uint16_t input = 0;
 	uint16_t realinput = 0;
 	int i;
-	char *title;
+	char *message = NULL;
 	// input handling
 	input_poll_cb();
 	for(i=0;i<16;i++)
@@ -139,14 +137,20 @@ void retro_run(void)
 	}
 	//graphic handling
 	memset(framebuffer,0,sizeof(unsigned short) * 320 * 240);
-	color = get_color(0,63,0);
-	get_track_title(title);
-	//printf(title);
-	draw_string(framebuffer,color,title,0,116);
+	message = malloc(100);
+	get_game_name(message);
+	draw_string(framebuffer,get_color(31,0,0),message,0,100);
+	get_track_count(message);
+	draw_string(framebuffer,get_color(0,63,0),message,0,110);
+	get_song_name(message);
+	draw_string(framebuffer,get_color(0,0,31),message,0,120);
+	get_track_position(message);
+	draw_string(framebuffer,get_color(31,63,31),message,0,130);
     video_cb(framebuffer, 320, 240, sizeof(unsigned short) * 320);
 	//audio handling
 	audio_batch_cb(play(is_playing),1470);
 	framecounter++;
+	free(message);
 }
 
 // File Loading

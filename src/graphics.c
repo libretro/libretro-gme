@@ -4,7 +4,7 @@
 unsigned short get_color(char r, char g, char b)
 {
 	unsigned short color;
-	color= (r << 16) | (g << 8) | b;
+	color= (r << 11) | (g << 5) | b;
 	return color;
 }
 

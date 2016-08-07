@@ -63,11 +63,24 @@ void prev_track(void)
 	}
 }
 
-void get_track_title(char *title)
+void get_game_name(char *buf)
+{
+	sprintf(buf, "%s",track_info_->game);
+}
+
+void get_track_count(char *buf)
+{
+	sprintf(buf, "%d/%d",current_track+1,gme_track_count(emu));
+}
+
+void get_song_name(char *buf)
+{
+	sprintf(buf, "%s",strcmp(track_info_->song,"") ? track_info_->song : "-");
+}
+
+void get_track_position(char *buf)
 {
 	long seconds = track_info_->length / 1000;
 	long elapsed_seconds = gme_tell(emu) / 1000;
-	sprintf(title, "%s: %d/%d %s (%ld:%02ld / %ld:%02ld)",track_info_->game,current_track+1,gme_track_count(emu),track_info_->song,elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
-	printf(title);
-	return title;
+	sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
 }
