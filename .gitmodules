@@ -1,3 +1,6 @@
 [submodule "deps/game-music-emu"]
 	path = deps/game-music-emu
 	url = https://bitbucket.org/mpyne/game-music-emu.git
+[submodule "deps/libretro-common"]
+	path = deps/libretro-common
+	url = https://github.com/libretro/libretro-common.git

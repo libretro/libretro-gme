@@ -1,0 +1,20 @@
+# Name displayed when the user is selecting the core:
+display_name = "Game Music Emulator"
+
+# Name of the authors who wrote the core:
+authors = "Shay Green"
+
+# List of extensions the core supports:
+supported_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz"
+
+# Name of the core:
+corename = "GME"
+
+# License of the cores source code:
+license = "GPLv2"
+
+# Version of the core:
+display_version = "v1.0"
+
+# Whether or not the core requires an external file to work:
+supports_no_game = "false"

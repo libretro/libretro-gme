@@ -1,11 +1,12 @@
 CC = gcc
 CXX = g++
-INCFLAGS= -I. -Isrc/libretro -Ideps/game-music-emu/gme
+INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme
 CFLAGS=-c -Wall $(INCFLAGS)
 CXXFLAGS=-c -Wall $(INCFLAGS)
-LDFLAGS= -shared -L /mingw32/lib -lz
+LDFLAGS= -shared -L /mingw64/lib -lz
 
 EXECUTABLE= gme_libretro.dll
+INFO= gme_libretro.info
 
 SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 			deps/game-music-emu/gme/Ay_Cpu.cpp \
@@ -54,20 +55,20 @@ SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 			deps/game-music-emu/gme/Ym2413_Emu.cpp \
 			deps/game-music-emu/gme/Ym2612_Emu.cpp 
 
-SOURCES_C    := src/libretro/libretro.c \
-				src/libretro/compat/compat_fnmatch.c \
-				src/libretro/compat/compat_posix_string.c \
-				src/libretro/compat/compat_strcasestr.c \
-				src/libretro/compat/compat_strl.c \
-				src/libretro/file/archive_file_zlib.c \
-				src/libretro/file/archive_file.c \
-				src/libretro/file/retro_dirent.c \
-				src/libretro/file/retro_stat.c \
-				src/libretro/file/file_path.c \
-				src/libretro/lists/dir_list.c \
-				src/libretro/lists/file_list.c \
-				src/libretro/lists/string_list.c \
-				src/libretro/streams/file_stream.c
+SOURCES_C    := src/libretro.c \
+				deps/libretro-common/compat/compat_fnmatch.c \
+				deps/libretro-common/compat/compat_posix_string.c \
+				deps/libretro-common/compat/compat_strcasestr.c \
+				deps/libretro-common/compat/compat_strl.c \
+				deps/libretro-common/file/archive_file_zlib.c \
+				deps/libretro-common/file/archive_file.c \
+				deps/libretro-common/file/retro_dirent.c \
+				deps/libretro-common/file/retro_stat.c \
+				deps/libretro-common/file/file_path.c \
+				deps/libretro-common/lists/dir_list.c \
+				deps/libretro-common/lists/file_list.c \
+				deps/libretro-common/lists/string_list.c \
+				deps/libretro-common/streams/file_stream.c
 				
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
@@ -84,9 +85,10 @@ $(EXECUTABLE): $(OBJECTS)
 all: $(EXECUTABLE)
 
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE) src/test.o test.exe
+	rm -f $(OBJECTS) $(EXECUTABLE)
 
 install:
 	cp $(EXECUTABLE) ../libretro-super/dist/cores
+	cp $(INFO) ../libretro-super/dist/info
 
-.PHONY: clean install test
+.PHONY: clean install
