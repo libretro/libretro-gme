@@ -1,20 +1,24 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "libretro.h"
-#include "file/archive_file.h"
-#include "lists/string_list.h"
-#include "gme.h"
-typedef struct string_list string_list;
+#include "player.h"
+#include "graphics.h"
 
-Music_Emu* emu;
-unsigned int framecounter;
+static unsigned int framecounter;
+static uint16_t x=0;
+static uint16_t y=0;
+static uint16_t previnput;
+static bool is_playing;
+static int track;
+
 void handle_error( const char* error );
 void handle_info( const char* info);
 
 // Callbacks
-retro_log_printf_t log_cb;
+static retro_log_printf_t log_cb;
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
@@ -32,9 +36,7 @@ void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_c
 unsigned retro_api_version(void) { return RETRO_API_VERSION; }
 unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
-short audio_buffer[8192];
-
-unsigned short framebuffer[640*480];
+unsigned short framebuffer[320*240];
 
 // Serialisation methods
 size_t retro_serialize_size(void) { return 0; }
@@ -71,11 +73,11 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
     memset(info, 0, sizeof(*info));
     info->timing.fps            = 60.0f;
     info->timing.sample_rate    = 44100;
-    info->geometry.base_width   = 640;
-    info->geometry.base_height  = 480;
-    info->geometry.max_width    = 640;
-    info->geometry.max_height   = 480;
-    info->geometry.aspect_ratio = 640.0f / 480.0f;
+    info->geometry.base_width   = 320;
+    info->geometry.base_height  = 240;
+    info->geometry.max_width    = 320;
+    info->geometry.max_height   = 240;
+    info->geometry.aspect_ratio = 320.0f / 240.0f;
     environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
 }
 
@@ -83,7 +85,7 @@ void retro_init(void)
 {
     /* set up some logging */
     struct retro_log_callback log;
-    unsigned level = 1;
+    unsigned level = 0;
     if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
         log_cb = log.log;
     else
@@ -105,21 +107,45 @@ void retro_reset(void)
 // Run a single frame
 void retro_run(void)
 {
-	char r,g,b;
 	unsigned short color;
-	memset(framebuffer,0,sizeof(unsigned short) * 640 * 480);
-	for(int i=0;i<(640*480);i++)
+	uint16_t input = 0;
+	uint16_t realinput = 0;
+	int i;
+	char *title;
+	// input handling
+	input_poll_cb();
+	for(i=0;i<16;i++)
 	{
-		r = (i / 640 ) /15;
-		g = (i % 640) /20;
-		b = (framecounter % 64) > 31 ? (31 - (framecounter % 32)) : (framecounter % 32);
-		color = (r << 11) | (g << 5) | b;
-		framebuffer[i] = color;
+		if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i))
+		{
+			realinput |= 1<<i;
+		}
 	}
-	//memset(framebuffer,color,640*480 * 2);	
-	audio_batch_cb(audio_buffer,1960);
-	handle_error( gme_play( emu, 2048, audio_buffer ) );
-    video_cb(framebuffer, 640, 480, sizeof(unsigned short) * 640);
+	input = realinput & ~previnput;
+	previnput = realinput;	
+	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_L))
+	{
+		prev_track();
+	}
+	
+	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_R))
+	{
+		next_track();
+	}
+	
+	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_START))
+	{
+		is_playing = !is_playing;
+	}
+	//graphic handling
+	memset(framebuffer,0,sizeof(unsigned short) * 320 * 240);
+	color = get_color(0,63,0);
+	get_track_title(title);
+	//printf(title);
+	draw_string(framebuffer,color,title,0,116);
+    video_cb(framebuffer, 320, 240, sizeof(unsigned short) * 320);
+	//audio handling
+	audio_batch_cb(play(is_playing),1470);
 	framecounter++;
 }
 
@@ -127,22 +153,13 @@ void retro_run(void)
 bool retro_load_game(const struct retro_game_info *info)
 {
 	long sample_rate = 44100;
-	int track = 0;
-	string_list *lstfiles; 
-	file_archive_transfer_t state;
-	char msg[255];
-	lstfiles = (string_list*)malloc(sizeof(string_list));
-	lstfiles = file_archive_get_file_list("C:\\UserTemp\\DMA\\Dev\\msys32\\home\\I36107\\libretro-gme\\test\\Final Fantasy 6 [ff6].zip",NULL);
-	
-	sprintf(msg,"%i files in archive",(size_t)lstfiles->size);
-	handle_info(msg);
+	x = (320/2)-(32/2);
+	y = (240/2)-(32/2);
     if (info && info->data) { // ensure there is ROM data
-
-		handle_error( gme_open_file( info->path, &emu, sample_rate ) );
-		handle_error( gme_start_track( emu, track ) );
-		handle_error( gme_play( emu, 2048, audio_buffer ) );		
+		open_file( info->path, sample_rate);
+		is_playing = true;
     }
-    return true;
+	return true;		
 }
 
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info) 
@@ -152,7 +169,7 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 
 void retro_unload_game(void) 
 {
-	gme_delete( emu );
+	close_file();
 }
 
 void handle_error( const char* error )

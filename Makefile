@@ -1,7 +1,7 @@
 CC = gcc
 CXX = g++
 INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme
-CFLAGS=-c -Wall $(INCFLAGS)
+CFLAGS=-c -Wall $(INCFLAGS) -DHAVE_RPNG
 CXXFLAGS=-c -Wall $(INCFLAGS)
 LDFLAGS= -shared -L /mingw64/lib -lz
 
@@ -56,6 +56,8 @@ SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 			deps/game-music-emu/gme/Ym2612_Emu.cpp 
 
 SOURCES_C    := src/libretro.c \
+				src/graphics.c \
+				src/player.c \
 				deps/libretro-common/compat/compat_fnmatch.c \
 				deps/libretro-common/compat/compat_posix_string.c \
 				deps/libretro-common/compat/compat_strcasestr.c \
@@ -65,11 +67,11 @@ SOURCES_C    := src/libretro.c \
 				deps/libretro-common/file/retro_dirent.c \
 				deps/libretro-common/file/retro_stat.c \
 				deps/libretro-common/file/file_path.c \
+				deps/libretro-common/file/nbio/nbio_stdio.c \
 				deps/libretro-common/lists/dir_list.c \
 				deps/libretro-common/lists/file_list.c \
 				deps/libretro-common/lists/string_list.c \
 				deps/libretro-common/streams/file_stream.c
-				
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
