@@ -138,14 +138,18 @@ void retro_run(void)
 	//graphic handling
 	memset(framebuffer,0,sizeof(unsigned short) * 320 * 240);
 	message = malloc(100);
+	draw_line(framebuffer,get_color(31,63,31),5,5,315,5);
+	draw_line(framebuffer,get_color(31,63,31),5,235,315,235);
+	draw_line(framebuffer,get_color(31,63,31),5,5,5,235);
+	draw_line(framebuffer,get_color(31,63,31),315,5,315,235);
 	get_game_name(message);
-	draw_string(framebuffer,get_color(31,0,0),message,0,100);
+	draw_string(framebuffer,get_color(31,0,0),message,6,100);
 	get_track_count(message);
-	draw_string(framebuffer,get_color(0,63,0),message,0,110);
+	draw_string(framebuffer,get_color(0,63,0),message,6,110);
 	get_song_name(message);
-	draw_string(framebuffer,get_color(0,0,31),message,0,120);
+	draw_string(framebuffer,get_color(0,0,31),message,6,120);
 	get_track_position(message);
-	draw_string(framebuffer,get_color(31,63,31),message,0,130);
+	draw_string(framebuffer,get_color(31,63,31),message,6,130);
     video_cb(framebuffer, 320, 240, sizeof(unsigned short) * 320);
 	//audio handling
 	audio_batch_cb(play(is_playing),1470);

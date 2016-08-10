@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include <stdlib.h>
 #include <string.h>
 
 unsigned short get_color(char r, char g, char b)
@@ -6,6 +7,58 @@ unsigned short get_color(char r, char g, char b)
 	unsigned short color;
 	color= (r << 11) | (g << 5) | b;
 	return color;
+}
+
+void draw_line(unsigned short *fb, unsigned short color, int start_x, int start_y, int end_x, int end_y)
+{
+	if(start_x==end_x) //vertical line
+	{
+		for(int y=start_y;y<=end_y;y++)
+		{
+			fb[start_x+(y*320)] = color;
+		}
+	}
+	else if(start_y==end_y) // horizontal line
+	{
+		for(int x=start_x;x<=end_x;x++)
+		{
+			fb[x+(start_y*320)] = color;
+		}
+	}
+	else // Brenenham line
+	{
+		int x, y, end, dx, dy, p;
+		dx = abs(start_x - end_x);
+		dy = abs(start_y - end_y);
+		p = 2 * dy - dx;
+		if(start_x > end_x)
+		{
+			x = end_x;
+			y = end_y;
+			end = start_x;
+		}
+		else
+		{
+			x = start_x;
+			y = start_y;
+			end = end_x;
+		}
+		fb[x+(y*320)] = color;
+		while(x<end)
+		{
+			x++;
+			if(p <0)
+			{
+				p += 2 * dy; 
+			}
+			else
+			{
+				y++;
+				p += 2 * dy - dx;
+			}
+			fb[x+(y*320)] = color;
+		}
+	}
 }
 
 void draw_shape(unsigned short *fb, unsigned short color, int pos_x, int pos_y, int w, int h)
