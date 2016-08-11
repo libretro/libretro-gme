@@ -25,38 +25,19 @@ void draw_line(unsigned short *fb, unsigned short color, int start_x, int start_
 			fb[x+(start_y*320)] = color;
 		}
 	}
-	else // Brenenham line
+	else 
 	{
-		int x, y, end, dx, dy, p;
-		dx = abs(start_x - end_x);
-		dy = abs(start_y - end_y);
-		p = 2 * dy - dx;
-		if(start_x > end_x)
-		{
-			x = end_x;
-			y = end_y;
-			end = start_x;
-		}
-		else
-		{
-			x = start_x;
-			y = start_y;
-			end = end_x;
-		}
-		fb[x+(y*320)] = color;
-		while(x<end)
-		{
-			x++;
-			if(p <0)
-			{
-				p += 2 * dy; 
-			}
-			else
-			{
-				y++;
-				p += 2 * dy - dx;
-			}
+		// Bresenham line algorithm, copied from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
+		int x = start_x, y = start_y;
+		int dx = abs(end_x-start_x), sx = start_x<end_x ? 1 : -1;
+		int dy = abs(end_y-start_y), sy = start_y<end_y ? 1 : -1; 
+		int err = (dx>dy ? dx : -dy)/2, e2;
+		for(;;){
 			fb[x+(y*320)] = color;
+			if (x==end_x && y==end_y) break;
+			e2 = err;
+			if (e2 >-dx) { err -= dy; x += sx; }
+			if (e2 < dy) { err += dx; y += sy; }
 		}
 	}
 }

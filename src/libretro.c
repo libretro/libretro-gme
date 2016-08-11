@@ -138,10 +138,16 @@ void retro_run(void)
 	//graphic handling
 	memset(framebuffer,0,sizeof(unsigned short) * 320 * 240);
 	message = malloc(100);
+	//lines
 	draw_line(framebuffer,get_color(31,63,31),5,5,315,5);
 	draw_line(framebuffer,get_color(31,63,31),5,235,315,235);
 	draw_line(framebuffer,get_color(31,63,31),5,5,5,235);
 	draw_line(framebuffer,get_color(31,63,31),315,5,315,235);
+	draw_line(framebuffer,get_color(31,63,31),5,5,20,20);
+	draw_line(framebuffer,get_color(31,63,31),315,5,300,20);
+	draw_line(framebuffer,get_color(31,63,31),5,235,20,220);
+	draw_line(framebuffer,get_color(31,63,31),315,235,300,220);
+	//text
 	get_game_name(message);
 	draw_string(framebuffer,get_color(31,0,0),message,6,100);
 	get_track_count(message);

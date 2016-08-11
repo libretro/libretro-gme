@@ -3,7 +3,7 @@ CXX = g++
 INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme
 CFLAGS=-c -Wall $(INCFLAGS) -DHAVE_RPNG
 CXXFLAGS=-c -Wall $(INCFLAGS)
-LDFLAGS= -shared -L /mingw64/lib -lz
+LDFLAGS= -shared -L /mingw32/lib -lz
 
 EXECUTABLE= gme_libretro.dll
 INFO= gme_libretro.info
