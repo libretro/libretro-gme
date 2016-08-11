@@ -11,7 +11,7 @@ static unsigned int framecounter;
 static uint16_t x=0;
 static uint16_t y=0;
 static uint16_t previnput;
-static bool is_playing;
+
 
 void handle_error( const char* error );
 void handle_info( const char* info);
@@ -110,6 +110,7 @@ void retro_run(void)
 	uint16_t realinput = 0;
 	int i;
 	char *message = NULL;
+	int msglen = 0, maxlen = 0;
 	// input handling
 	input_poll_cb();
 	for(i=0;i<16;i++)
@@ -133,32 +134,39 @@ void retro_run(void)
 	
 	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_START))
 	{
-		is_playing = !is_playing;
+		play_pause();
 	}
 	//graphic handling
 	memset(framebuffer,0,sizeof(unsigned short) * 320 * 240);
 	message = malloc(100);
 	//lines
-	draw_line(framebuffer,get_color(31,63,31),5,5,315,5);
-	draw_line(framebuffer,get_color(31,63,31),5,235,315,235);
-	draw_line(framebuffer,get_color(31,63,31),5,5,5,235);
-	draw_line(framebuffer,get_color(31,63,31),315,5,315,235);
-	draw_line(framebuffer,get_color(31,63,31),5,5,20,20);
-	draw_line(framebuffer,get_color(31,63,31),315,5,300,20);
-	draw_line(framebuffer,get_color(31,63,31),5,235,20,220);
-	draw_line(framebuffer,get_color(31,63,31),315,235,300,220);
+	draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
+	draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
+	draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
+	draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
+	draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
+	draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
 	//text
 	get_game_name(message);
-	draw_string(framebuffer,get_color(31,0,0),message,6,100);
+	msglen = get_string_length(message);
+	draw_string(framebuffer,get_color(31,0,0),message,160-(msglen/2),100);
+	maxlen = msglen > maxlen ? msglen : maxlen;
 	get_track_count(message);
-	draw_string(framebuffer,get_color(0,63,0),message,6,110);
+	msglen = get_string_length(message);
+	draw_string(framebuffer,get_color(0,63,0),message,160-(msglen/2),110);
+	maxlen = msglen > maxlen ? msglen : maxlen;
 	get_song_name(message);
-	draw_string(framebuffer,get_color(0,0,31),message,6,120);
+	msglen = get_string_length(message);
+	draw_string(framebuffer,get_color(0,0,31),message,160-(msglen/2),120);
+	maxlen = msglen > maxlen ? msglen : maxlen;
 	get_track_position(message);
-	draw_string(framebuffer,get_color(31,63,31),message,6,130);
+	msglen = get_string_length(message);
+	draw_string(framebuffer,get_color(31,63,31),message,160-(msglen/2),130);
+	maxlen = msglen > maxlen ? msglen : maxlen;
+	draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
     video_cb(framebuffer, 320, 240, sizeof(unsigned short) * 320);
 	//audio handling
-	audio_batch_cb(play(is_playing),1470);
+	audio_batch_cb(play(),1470);
 	framecounter++;
 	free(message);
 }
@@ -171,7 +179,6 @@ bool retro_load_game(const struct retro_game_info *info)
 	y = (240/2)-(32/2);
     if (info && info->data) { // ensure there is ROM data
 		open_file( info->path, sample_rate);
-		is_playing = true;
     }
 	return true;		
 }

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define set_pixel(fb,x,y,color) fb[x+(y*320)] = color
+
 unsigned short get_color(char r, char g, char b)
 {
 	unsigned short color;
@@ -15,14 +17,14 @@ void draw_line(unsigned short *fb, unsigned short color, int start_x, int start_
 	{
 		for(int y=start_y;y<=end_y;y++)
 		{
-			fb[start_x+(y*320)] = color;
+			set_pixel(fb,start_x,y,color);
 		}
 	}
 	else if(start_y==end_y) // horizontal line
 	{
 		for(int x=start_x;x<=end_x;x++)
 		{
-			fb[x+(start_y*320)] = color;
+			set_pixel(fb,x,start_y,color) = color;
 		}
 	}
 	else 
@@ -33,7 +35,7 @@ void draw_line(unsigned short *fb, unsigned short color, int start_x, int start_
 		int dy = abs(end_y-start_y), sy = start_y<end_y ? 1 : -1; 
 		int err = (dx>dy ? dx : -dy)/2, e2;
 		for(;;){
-			fb[x+(y*320)] = color;
+			set_pixel(fb,x,y,color);
 			if (x==end_x && y==end_y) break;
 			e2 = err;
 			if (e2 >-dx) { err -= dy; x += sx; }
@@ -42,13 +44,21 @@ void draw_line(unsigned short *fb, unsigned short color, int start_x, int start_
 	}
 }
 
+void draw_box(unsigned short *fb, unsigned short color, int x0, int y0, int x1, int y1)
+{
+	draw_line(fb,color,x0,y0,x1,y0); //top line
+	draw_line(fb,color,x0,y1,x1,y1); //bottom line	
+	draw_line(fb,color,x0,y0,x0,y1); //left line
+	draw_line(fb,color,x1,y0,x1,y1); //right line
+}
+
 void draw_shape(unsigned short *fb, unsigned short color, int pos_x, int pos_y, int w, int h)
 {
 	for(int y=pos_y;y<(pos_y+h);y++)
 	{
 		for(int x=pos_x;x<(pos_x+w);x++)
 		{
-			fb[x+(y*320)] = color;
+			set_pixel(fb,x,y,color);
 		}
 	}	
 }
@@ -69,7 +79,7 @@ void draw_letter(unsigned short *fb, unsigned short color, char letter, int pos_
 		{
 			if(font_data[((charx+x)+((chary+y)*128))]==0)
 			{
-				fb[(pos_x+x)+((pos_y+y)*320)] = color;		
+				set_pixel(fb,(pos_x+x),(pos_y+y),color);
 			}
 		}
 	}		
@@ -84,4 +94,11 @@ void draw_string(unsigned short *fb, unsigned short color, char* text, int pos_x
 			draw_letter(fb,color,text[x],pos_x+(x*8),pos_y);			
 		}
 	}
+}
+
+int get_string_length(char* text)
+{
+	int ln = strlen(text);
+	return ln * 8;
+	
 }

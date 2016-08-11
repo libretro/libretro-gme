@@ -5,9 +5,11 @@
 #include <boolean.h>
 unsigned short get_color(char r, char g, char b);
 void draw_line(unsigned short *fb, unsigned short color, int start_x, int start_y, int end_x, int end_y);
+void draw_box(unsigned short *fb, unsigned short color, int x0, int y0, int x1, int y1);
 void draw_shape(unsigned short *fb, unsigned short color, int pos_x, int pos_y, int w, int h);
 void draw_letter(unsigned short *fb, unsigned short color, char letter, int pos_x, int pos_y);
 void draw_string(unsigned short *fb, unsigned short color, char* text, int pos_x, int pos_y);
+int get_string_length(char* text);
 
 /* GIMP RGBA C-Source image dump (font.c) */
 static const struct {

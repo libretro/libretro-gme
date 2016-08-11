@@ -1,10 +1,12 @@
 #include "player.h"
 #include <string.h>
+#include <boolean.h>
 
 static int current_track;
 Music_Emu* emu;
 static short audio_buffer[8192];
 gme_info_t* track_info_;
+static bool is_playing_;
 
 void open_file(const char *path, long sample_rate)
 {
@@ -19,30 +21,41 @@ void close_file(void)
 
 void start_track(int track)
 {
-	current_track = track;
+	memset(audio_buffer,0,8192);
+	current_track = track;	
 	gme_track_info( emu, &track_info_, track );
 	if ( track_info_->length <= 0 )
 		track_info_->length = track_info_->intro_length +
 					track_info_->loop_length * 2;	
 	if ( track_info_->length <= 0 )
 		track_info_->length = (long) (2.5 * 60 * 1000);
-	gme_set_fade(emu, track_info_->length );
 	gme_start_track(emu, current_track);
+	is_playing_ = true;
 }
 
-short *play(bool is_playing)
+short *play(void)
 {
-	if(is_playing)
+	if(is_playing_)
 	{
 		if(gme_track_ended(emu))
 		{
-			next_track();
+			if(current_track< (gme_track_count(emu)-1))
+			{
+				start_track(++current_track);
+			}
+			else
+			{
+				is_playing_ = false;
+			}
 		}
-		gme_play( emu, 2048, audio_buffer );
+		else
+		{
+			gme_play( emu, 2048, audio_buffer );			
+		}
 	}
 	else
 	{
-		memset(audio_buffer,0,sizeof(short)*8192);
+		memset(audio_buffer,0,8192);
 	}
 	return audio_buffer;
 }
@@ -83,4 +96,9 @@ void get_track_position(char *buf)
 	long seconds = track_info_->length / 1000;
 	long elapsed_seconds = gme_tell(emu) / 1000;
 	sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
+}
+
+void play_pause(void)
+{
+	is_playing_ = !is_playing_;
 }
