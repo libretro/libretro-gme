@@ -77,7 +77,7 @@ void draw_letter(unsigned short *fb, unsigned short color, char letter, int pos_
 	{
 		for(int x=0;x<8;x++)
 		{
-			if(font_data[((charx+x)+((chary+y)*128))]==0)
+			if(font_data[((charx+x)+((chary+y)*128))]==0 && (pos_x+x) < 320)
 			{
 				set_pixel(fb,(pos_x+x),(pos_y+y),color);
 			}

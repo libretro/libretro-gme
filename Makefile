@@ -6,12 +6,12 @@ ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
    platform = win
+else ifneq ($(findstring win,$(shell uname -a)),)
+   platform = win
 else ifneq ($(findstring MINGW,$(shell uname -a)),)
    platform = mingw
 else ifneq ($(findstring Darwin,$(shell uname -a)),)
    platform = osx
-else ifneq ($(findstring win,$(shell uname -a)),)
-   platform = win
 endif
 endif
 
@@ -24,7 +24,7 @@ endif
 
 #set extension and lib path
 
-ifeq ($(platform),mingw)
+ifneq ($(filter $(platform),win mingw),)
 EXT = .dll
 else ifeq ($(platform), unix)
 EXT = .so
@@ -33,7 +33,7 @@ endif
 
 CC = gcc
 CXX = g++
-INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme
+INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme -Ideps/zlib-1.2.8/contrib/minizip
 
 CFLAGS += -Wall -std=c99 $(INCFLAGS)
 CXXFLAGS += -Wall $(INCFLAGS)
@@ -92,7 +92,15 @@ SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 
 SOURCES_C    := src/libretro.c \
 				src/graphics.c \
-				src/player.c
+				src/player.c \
+				deps/zlib-1.2.8/adler32.c \
+				deps/zlib-1.2.8/crc32.c \
+				deps/zlib-1.2.8/inflate.c \
+				deps/zlib-1.2.8/inftrees.c \
+				deps/zlib-1.2.8/inffast.c \
+				deps/zlib-1.2.8/zutil.c \
+				deps/zlib-1.2.8/contrib/minizip/ioapi.c \
+				deps/zlib-1.2.8/contrib/minizip/unzip.c
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
