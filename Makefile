@@ -1,12 +1,47 @@
+STATIC_LINKING := 0
+AR             := ar
+
+#detect platform
+ifeq ($(platform),)
+platform = unix
+ifeq ($(shell uname -a),)
+   platform = win
+else ifneq ($(findstring MINGW,$(shell uname -a)),)
+   platform = mingw
+else ifneq ($(findstring Darwin,$(shell uname -a)),)
+   platform = osx
+else ifneq ($(findstring win,$(shell uname -a)),)
+   platform = win
+endif
+endif
+
+#detect architecture
+ifeq ($(shell uname -m),)
+   arch = i686
+else
+   arch = ($(shell uname -m) 
+endif
+
+#set extension and lib path
+
+ifeq ($(platform),mingw)
+EXT = .dll
+else ifeq ($(platform), unix)
+EXT = .so
+fpic = -fPIC
+endif
+
 CC = gcc
 CXX = g++
 INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme
-CFLAGS=-c -Wall $(INCFLAGS) -DHAVE_RPNG
-CXXFLAGS=-c -Wall $(INCFLAGS)
-LDFLAGS= -shared -L /mingw32/lib -lz
 
-EXECUTABLE= gme_libretro.dll
-INFO= gme_libretro.info
+CFLAGS += -Wall -std=c99 $(INCFLAGS)
+CXXFLAGS += -Wall $(INCFLAGS)
+LDFLAGS += -shared
+
+TARGET_NAME := gme_libretro
+EXECUTABLE = $(TARGET_NAME)$(EXT)
+INFO = $(TARGET_NAME).info
 
 SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 			deps/game-music-emu/gme/Ay_Cpu.cpp \
@@ -57,29 +92,15 @@ SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 
 SOURCES_C    := src/libretro.c \
 				src/graphics.c \
-				src/player.c \
-				deps/libretro-common/compat/compat_fnmatch.c \
-				deps/libretro-common/compat/compat_posix_string.c \
-				deps/libretro-common/compat/compat_strcasestr.c \
-				deps/libretro-common/compat/compat_strl.c \
-				deps/libretro-common/file/archive_file_zlib.c \
-				deps/libretro-common/file/archive_file.c \
-				deps/libretro-common/file/retro_dirent.c \
-				deps/libretro-common/file/retro_stat.c \
-				deps/libretro-common/file/file_path.c \
-				deps/libretro-common/file/nbio/nbio_stdio.c \
-				deps/libretro-common/lists/dir_list.c \
-				deps/libretro-common/lists/file_list.c \
-				deps/libretro-common/lists/string_list.c \
-				deps/libretro-common/streams/file_stream.c
+				src/player.c
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) $(fpic) -c -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) $(fpic) -c -o $@ $<
     
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
