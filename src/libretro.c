@@ -8,11 +8,10 @@
 #include "graphics.h"
 
 static unsigned int framecounter;
-static uint16_t x=0;
-static uint16_t y=0;
 static uint16_t previnput;
 
-
+void draw_ui(void);
+int draw_text(char* text, char r, char g, char b, int y, int maxlen);
 void handle_error( const char* error );
 void handle_info( const char* info);
 
@@ -35,7 +34,7 @@ void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_c
 unsigned retro_api_version(void) { return RETRO_API_VERSION; }
 unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
-unsigned short framebuffer[320*240];
+static surface *framebuffer;
 
 // Serialisation methods
 size_t retro_serialize_size(void) { return 0; }
@@ -92,10 +91,13 @@ void retro_init(void)
     // the performance level is guide to frontend to give an idea of how intensive this core is to run
     environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
 	framecounter = 0;
+	framebuffer = create_surface(320,240,2);
 }
 
 // End of retrolib
-void retro_deinit(void) {}
+void retro_deinit(void) {
+	free(framebuffer);
+}
 
 // Reset gme
 void retro_reset(void) 
@@ -109,8 +111,7 @@ void retro_run(void)
 	uint16_t input = 0;
 	uint16_t realinput = 0;
 	int i;
-	char *message = NULL;
-	int msglen = 0, maxlen = 0;
+
 	// input handling
 	input_poll_cb();
 	for(i=0;i<16;i++)
@@ -137,46 +138,18 @@ void retro_run(void)
 		play_pause();
 	}
 	//graphic handling
-	memset(framebuffer,0,sizeof(unsigned short) * 320 * 240);
-	message = malloc(100);
-	//lines
-	draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
-	draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
-	draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
-	draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
-	draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
-	draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
-	//text
-	get_game_name(message);
-	msglen = get_string_length(message);
-	draw_string(framebuffer,get_color(31,0,0),message,160-(msglen/2),100);
-	maxlen = msglen > maxlen ? msglen : maxlen;
-	get_track_count(message);
-	msglen = get_string_length(message);
-	draw_string(framebuffer,get_color(0,63,0),message,160-(msglen/2),110);
-	maxlen = msglen > maxlen ? msglen : maxlen;
-	get_song_name(message);
-	msglen = get_string_length(message);
-	draw_string(framebuffer,get_color(0,0,31),message,160-(msglen/2),120);
-	maxlen = msglen > maxlen ? msglen : maxlen;
-	get_track_position(message);
-	msglen = get_string_length(message);
-	draw_string(framebuffer,get_color(31,63,31),message,160-(msglen/2),130);
-	maxlen = msglen > maxlen ? msglen : maxlen;
-	draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
-    video_cb(framebuffer, 320, 240, sizeof(unsigned short) * 320);
+	memset(framebuffer->pixel_data,0,framebuffer->bytes_per_pixel * framebuffer->width * framebuffer->height);
+	draw_ui();
+    video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
 	//audio handling
 	audio_batch_cb(play(),1470);
 	framecounter++;
-	free(message);
 }
 
 // File Loading
 bool retro_load_game(const struct retro_game_info *info)
 {
 	long sample_rate = 44100;
-	x = (320/2)-(32/2);
-	y = (240/2)-(32/2);
     if (info && info->data) { // ensure there is ROM data
 		open_file( info->path, sample_rate);
     }
@@ -191,6 +164,37 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 void retro_unload_game(void) 
 {
 	close_file();
+}
+
+void draw_ui(void)
+{
+	char *message = NULL;
+	int maxlen = 0;
+	message = malloc(100);
+	//lines
+	draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
+	draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
+	draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
+	draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
+	draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
+	draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
+	//text
+	maxlen = draw_text(get_game_name(message),31,0,0,100,maxlen);
+	maxlen = draw_text(get_track_count(message),0,63,0,110,maxlen);
+	maxlen = draw_text(get_song_name(message),0,0,31,120,maxlen);
+	maxlen = draw_text(get_track_position(message),31,63,31,130,maxlen);
+	maxlen = min(maxlen,280);
+	draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
+	free(message);
+}
+
+int draw_text(char* text,char r, char g, char b, int y, int maxlen)
+{
+	int msglen;
+	msglen = get_string_length(text);
+	//draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y);
+	draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y);
+	return max(msglen,maxlen);
 }
 
 void handle_error( const char* error )

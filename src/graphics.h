@@ -3,21 +3,42 @@
 
 #include <stdint.h>
 #include <boolean.h>
-unsigned short get_color(char r, char g, char b);
-void draw_line(unsigned short *fb, unsigned short color, int start_x, int start_y, int end_x, int end_y);
-void draw_box(unsigned short *fb, unsigned short color, int x0, int y0, int x1, int y1);
-void draw_shape(unsigned short *fb, unsigned short color, int pos_x, int pos_y, int w, int h);
-void draw_letter(unsigned short *fb, unsigned short color, char letter, int pos_x, int pos_y);
-void draw_string(unsigned short *fb, unsigned short color, char* text, int pos_x, int pos_y);
-int get_string_length(char* text);
 
-/* GIMP RGBA C-Source image dump (font.c) */
-static const struct {
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
+#define set_pixel(surf,x,y,color) ((unsigned short *)surf->pixel_data)[(x)+((y)*surf->width)] = color
+#define get_pixel(surf,x,y) ((unsigned short *)surf->pixel_data)[(x)+((y)*surf->width)]
+#define is_font_pixel(x,y) (((unsigned short *)font.pixel_data)[(x)+((y)*font.width)] == 0 ? 1 : 0)
+
+typedef struct {
   unsigned int 	 width;
   unsigned int 	 height;
   unsigned int 	 bytes_per_pixel; /* 2:RGB16, 3:RGB, 4:RGBA */ 
-  unsigned char	 pixel_data[128 * 128 * 2 + 1];
-} font = {
+  char  		*pixel_data;
+} surface;
+
+unsigned short get_color(char r, char g, char b);
+surface *create_surface(unsigned int width, unsigned int height, unsigned int bpp);
+void free_surface(surface *surf);
+void copy_surface(surface *src_surf, surface *dst_surf, int x_src, int y_src, int x_dst, int y_dst, int w, int h);
+void draw_line(surface *surf, unsigned short color, int start_x, int start_y, int end_x, int end_y);
+void draw_box(surface *surf, unsigned short color, int x0, int y0, int x1, int y1);
+void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w, int h);
+void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, int pos_y);
+void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y);
+int get_string_length(char* text);
+
+
+
+/* GIMP RGBA C-Source image dump (font.c) */
+static const surface font = {
   128, 128, 2,
   "\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377"
   "\000\000\000\000\000\000\000\000\000\000\000\000\377\377\377\377\000\000\000\000\000\000\000\000\000\000\000\000\377\377"

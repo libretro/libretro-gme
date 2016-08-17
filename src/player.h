@@ -11,9 +11,9 @@ void start_track(int track);
 short *play(void);
 void next_track(void);
 void prev_track(void);
-void get_game_name(char *buf);
-void get_track_count(char *buf);
-void get_song_name(char *buf);
-void get_track_position(char *buf);
+char *get_game_name(char *buf);
+char *get_track_count(char *buf);
+char *get_song_name(char *buf);
+char *get_track_position(char *buf);
 void play_pause(void);
 #endif

@@ -76,26 +76,30 @@ void prev_track(void)
 	}
 }
 
-void get_game_name(char *buf)
+char *get_game_name(char *buf)
 {
 	sprintf(buf, "%s",track_info_->game);
+	return buf;
 }
 
-void get_track_count(char *buf)
+char *get_track_count(char *buf)
 {
 	sprintf(buf, "%d/%d",current_track+1,gme_track_count(emu));
+	return buf;
 }
 
-void get_song_name(char *buf)
+char *get_song_name(char *buf)
 {
 	sprintf(buf, "%s",strcmp(track_info_->song,"") ? track_info_->song : "-");
+	return buf;
 }
 
-void get_track_position(char *buf)
+char *get_track_position(char *buf)
 {
 	long seconds = track_info_->length / 1000;
 	long elapsed_seconds = gme_tell(emu) / 1000;
 	sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
+	return buf;
 }
 
 void play_pause(void)
