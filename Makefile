@@ -33,7 +33,7 @@ endif
 
 CC = gcc
 CXX = g++
-INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme -Ideps/zlib-1.2.8/contrib/minizip
+INCFLAGS= -I. -Ideps/libretro-common/include -Ideps/game-music-emu/gme  -Ideps/zlib-1.2.8 -Ideps/zlib-1.2.8/contrib/minizip
 
 CFLAGS += -Wall -std=c99 $(INCFLAGS)
 CXXFLAGS += -Wall $(INCFLAGS)
