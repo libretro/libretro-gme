@@ -34,13 +34,33 @@ void free_surface(surface *surf)
 	}
 }
 
+surface *clip_surface(surface *src_surf, int x_src, int y_src, int x0, int y0, int x1, int y1)
+{
+	int wx0,wy0,wx1,wy1; //world coord
+	int lx,ly,lw,lh; //local coord
+	surface *clipped_surf = NULL;
+	//check if completely out of bounds
+	if( (x_src+src_surf->width) <x0 || x_src > x1 || (y_src+src_surf->height) < y0 || y_src > y1)
+	{
+		return clipped_surf;
+	}
+	wx0 = max(x_src,x0);
+	wy0 = max(y_src,y0);
+	wx1 = min(x_src+src_surf->width,x1);
+	wy1 = min(y_src+src_surf->height,y1);
+	lx = wx0 - x_src;
+	ly = wy0 - y_src;
+	lw = wx1 - wx0;
+	lh = wy1 - wy0;
+	clipped_surf = create_surface(lw, lh,2);
+	copy_surface(src_surf,clipped_surf,lx,ly,0,0,lw,lh);
+	return clipped_surf;
+}
+
 void copy_surface(surface *src_surf, surface *dst_surf, int x_src, int y_src, int x_dst, int y_dst, int w, int h)
 {
 	int x,y;
 	unsigned short pixel;
-	//clamp width and height
-	w = min(w,dst_surf->width-x_dst-20);
-	h = min(h,dst_surf->height-y_dst-15);
 	for(y=0;y<h;y++)
 	{
 		for(x=0;x<w;x++)
@@ -124,16 +144,33 @@ void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, in
 	}		
 }
 
-void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y)
+void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter)
 {
+	int x_offset = 0;
+	int delta = 0;
+	int delay = 30;
+	int modulo = 0;
+	int frame_delay = 2;
 	int msglen = strlen(text);
 	surface *temp_surface = create_surface((msglen*8),8,2);	
 	for(int x=0;x<msglen;x++)
 	{
 		draw_letter(temp_surface,color,text[x],(x*8),0);
 	}
-	copy_surface(temp_surface,surf,0,0,pos_x,pos_y,(msglen*8),8);
-
+	if((msglen*8)>280)
+	{
+		delta = (msglen*8) -280;
+		modulo = delta + (delay * 2);
+		x_offset = (modulo - abs(framecounter/frame_delay % (2*modulo) - modulo)) - delay; // triangle function
+		x_offset = max(x_offset,0); //clamp left to add delay
+		x_offset = min(x_offset,delta); //clamp right to add delay
+	}
+	surface *clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,20,20,300,220);
+	if(clipped_surface !=NULL)
+	{
+		copy_surface(clipped_surface,surf,0,0,pos_x,pos_y,clipped_surface->width,clipped_surface->height);
+		free_surface(clipped_surface);		
+	}
 	free_surface(temp_surface);
 }
 
@@ -141,5 +178,4 @@ int get_string_length(char* text)
 {
 	int ln = strlen(text);
 	return ln * 8;
-	
 }

@@ -32,7 +32,7 @@ void draw_line(surface *surf, unsigned short color, int start_x, int start_y, in
 void draw_box(surface *surf, unsigned short color, int x0, int y0, int x1, int y1);
 void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w, int h);
 void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, int pos_y);
-void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y);
+void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter);
 int get_string_length(char* text);
 
 

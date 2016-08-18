@@ -7,7 +7,6 @@
 #include "player.h"
 #include "graphics.h"
 
-static unsigned int framecounter;
 static uint16_t previnput;
 
 void draw_ui(void);
@@ -90,7 +89,6 @@ void retro_init(void)
         log_cb = NULL;
     // the performance level is guide to frontend to give an idea of how intensive this core is to run
     environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
-	framecounter = 0;
 	framebuffer = create_surface(320,240,2);
 }
 
@@ -143,7 +141,6 @@ void retro_run(void)
     video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
 	//audio handling
 	audio_batch_cb(play(),1470);
-	framecounter++;
 }
 
 // File Loading
@@ -192,8 +189,7 @@ int draw_text(char* text,char r, char g, char b, int y, int maxlen)
 {
 	int msglen;
 	msglen = get_string_length(text);
-	//draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y);
-	draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y);
+	draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y,get_track_elapsed_frames());
 	return max(msglen,maxlen);
 }
 

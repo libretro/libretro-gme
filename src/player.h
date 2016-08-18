@@ -15,5 +15,6 @@ char *get_game_name(char *buf);
 char *get_track_count(char *buf);
 char *get_song_name(char *buf);
 char *get_track_position(char *buf);
+int get_track_elapsed_frames(void);
 void play_pause(void);
 #endif

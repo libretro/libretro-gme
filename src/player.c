@@ -102,6 +102,11 @@ char *get_track_position(char *buf)
 	return buf;
 }
 
+int get_track_elapsed_frames(void)
+{
+	return gme_tell_samples(emu)/1470;
+}
+
 void play_pause(void)
 {
 	is_playing_ = !is_playing_;
