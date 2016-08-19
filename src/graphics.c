@@ -165,7 +165,7 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
 		x_offset = max(x_offset,0); //clamp left to add delay
 		x_offset = min(x_offset,delta); //clamp right to add delay
 	}
-	surface *clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,20,20,300,220);
+	surface *clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,21,21,299,219);
 	if(clipped_surface !=NULL)
 	{
 		copy_surface(clipped_surface,surf,0,0,pos_x,pos_y,clipped_surface->width,clipped_surface->height);

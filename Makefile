@@ -119,7 +119,7 @@ clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
 
 install:
-	cp $(EXECUTABLE) ../libretro-super/dist/cores
-	cp $(INFO) ../libretro-super/dist/info
-
+	cp $(EXECUTABLE) $(DESTDIR)/usr/local/lib/libretro
+	cp $(INFO) $(DESTDIR)/usr/local/lib/libretro
+	
 .PHONY: clean install

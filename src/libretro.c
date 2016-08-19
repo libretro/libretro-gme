@@ -34,6 +34,8 @@ unsigned retro_api_version(void) { return RETRO_API_VERSION; }
 unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
 static surface *framebuffer;
+char *filename;
+
 
 // Serialisation methods
 size_t retro_serialize_size(void) { return 0; }
@@ -147,6 +149,8 @@ void retro_run(void)
 bool retro_load_game(const struct retro_game_info *info)
 {
 	long sample_rate = 44100;
+	filename = malloc(strlen(info->path)+1);
+	strcpy(filename,(char *)(info->path));
     if (info && info->data) { // ensure there is ROM data
 		open_file( info->path, sample_rate);
     }
@@ -161,6 +165,7 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 void retro_unload_game(void) 
 {
 	close_file();
+	free(filename);
 }
 
 void draw_ui(void)
@@ -183,6 +188,7 @@ void draw_ui(void)
 	maxlen = min(maxlen,280);
 	draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
 	free(message);
+	//draw_string(framebuffer,get_color(15,31,15),filename,21,30,get_track_elapsed_frames());
 }
 
 int draw_text(char* text,char r, char g, char b, int y, int maxlen)
