@@ -4,15 +4,14 @@
 #include <assert.h>
 
 #include "libretro.h"
-#include "player.h"
 #include "graphics.h"
+#include "player.h"
+#include "playlist.h"
 
-static uint16_t previnput;
-
-void draw_ui(void);
-int draw_text(char* text, char r, char g, char b, int y, int maxlen);
-void handle_error( const char* error );
-void handle_info( const char* info);
+// Static globals
+static surface *framebuffer = NULL;;
+static uint16_t previnput = 0;
+static playlist *plist = NULL;;
 
 // Callbacks
 static retro_log_printf_t log_cb;
@@ -33,10 +32,6 @@ void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_c
 unsigned retro_api_version(void) { return RETRO_API_VERSION; }
 unsigned retro_get_region(void) { return RETRO_REGION_PAL; }
 
-static surface *framebuffer;
-char *filename;
-
-
 // Serialisation methods
 size_t retro_serialize_size(void) { return 0; }
 bool retro_serialize(void *data, size_t size) { return false; }
@@ -51,6 +46,12 @@ size_t retro_get_memory_size(unsigned id){ return 0; }
 void retro_cheat_reset(void) {}
 void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
+// Custom functions
+void draw_ui(void);
+int draw_text_centered(char* text, char r, char g, char b, int y, int maxlen);
+void handle_error( const char* error );
+void handle_info( const char* info);
+
 /*
  * Tell libretro about this core, it's name, version and which rom files it supports.
  */
@@ -60,7 +61,8 @@ void retro_get_system_info(struct retro_system_info *info)
     info->library_name = "Game Music Emulator";
     info->library_version = "v0.6.1";
     info->need_fullpath = false;
-    info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz";
+    info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz|zip";
+	info->block_extract = true;
 }
 
 /*
@@ -139,22 +141,30 @@ void retro_run(void)
 	}
 	//graphic handling
 	memset(framebuffer->pixel_data,0,framebuffer->bytes_per_pixel * framebuffer->width * framebuffer->height);
-	draw_ui();
+	//draw_ui();
+	audio_batch_cb(play(),1470);
     video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
 	//audio handling
-	audio_batch_cb(play(),1470);
 }
 
 // File Loading
 bool retro_load_game(const struct retro_game_info *info)
 {
 	long sample_rate = 44100;
-	filename = malloc(strlen(info->path)+1);
-	strcpy(filename,(char *)(info->path));
-    if (info && info->data) { // ensure there is ROM data
-		open_file( info->path, sample_rate);
-    }
-	return true;		
+	char message[256];
+	int i;
+	if (info && info->data) { // ensure there is ROM data
+		//open_file( info->path, sample_rate);
+		plist = load_playlist(info->path,sample_rate);
+		for(int i=0;i<plist->num_tracks;i++)
+		{
+			sprintf(message,"Track %s (%i/%i) data_length %i",plist->entries[i]->track_name,plist->entries[i]->track_number,plist->num_tracks,plist->entries[i]->track_data_length);
+			handle_info(message);			
+		}
+		//open_data(plist->entries[0]->track_data,plist->entries[0]->track_data_length,sample_rate);
+		return true;
+	}
+	return true;
 }
 
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info) 
@@ -165,7 +175,8 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 void retro_unload_game(void) 
 {
 	close_file();
-	free(filename);
+	if(plist!=NULL)
+		unload_playlist(plist);
 }
 
 void draw_ui(void)
@@ -181,17 +192,16 @@ void draw_ui(void)
 	draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
 	draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
 	//text
-	maxlen = draw_text(get_game_name(message),31,0,0,100,maxlen);
-	maxlen = draw_text(get_track_count(message),0,63,0,110,maxlen);
-	maxlen = draw_text(get_song_name(message),0,0,31,120,maxlen);
-	maxlen = draw_text(get_track_position(message),31,63,31,130,maxlen);
+	maxlen = draw_text_centered(get_game_name(message),31,0,0,100,maxlen);
+	maxlen = draw_text_centered(get_track_count(message),0,63,0,110,maxlen);
+	maxlen = draw_text_centered(get_song_name(message),0,0,31,120,maxlen);
+	maxlen = draw_text_centered(get_track_position(message),31,63,31,130,maxlen);
 	maxlen = min(maxlen,280);
 	draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
 	free(message);
-	//draw_string(framebuffer,get_color(15,31,15),filename,21,30,get_track_elapsed_frames());
 }
 
-int draw_text(char* text,char r, char g, char b, int y, int maxlen)
+int draw_text_centered(char* text,char r, char g, char b, int y, int maxlen)
 {
 	int msglen;
 	msglen = get_string_length(text);
@@ -212,7 +222,7 @@ void handle_info( const char* info )
 {
 	char str [256];
 	if(info) {
-		sprintf( str, "Info: %s", info );
+		sprintf( str, "Info: %s\n", info );
 		log_cb(RETRO_LOG_INFO, str ); 		
 	}
 }

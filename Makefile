@@ -93,6 +93,7 @@ SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 SOURCES_C    := src/libretro.c \
 				src/graphics.c \
 				src/player.c \
+				src/playlist.c \
 				deps/zlib-1.2.8/adler32.c \
 				deps/zlib-1.2.8/crc32.c \
 				deps/zlib-1.2.8/inflate.c \

@@ -5,7 +5,9 @@
 #include <boolean.h>
 #include "gme.h"
 
+bool is_emu_loaded(void);
 void open_file(const char *path, long sample_rate);
+void open_data(char *data, int length, long sample_rate);
 void close_file(void);
 void start_track(int track);
 short *play(void);
@@ -17,4 +19,5 @@ char *get_song_name(char *buf);
 char *get_track_position(char *buf);
 int get_track_elapsed_frames(void);
 void play_pause(void);
+
 #endif

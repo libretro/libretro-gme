@@ -5,7 +5,7 @@ display_name = "Game Music Emu"
 authors = "Blargg"
 
 # List of extensions the core supports:
-supported_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz"
+supported_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz|zip"
 
 # Name of the core:
 corename = "GME"
