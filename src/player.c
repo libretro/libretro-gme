@@ -3,10 +3,15 @@
 #include <boolean.h>
 
 static int current_track;
-Music_Emu* emu;
+Music_Emu* emu = NULL;
 static short audio_buffer[8192];
 gme_info_t* track_info_;
 static bool is_playing_;
+
+bool is_emu_loaded(void)
+{
+	return (emu != NULL);
+}
 
 void open_file(const char *path, long sample_rate)
 {
@@ -14,8 +19,15 @@ void open_file(const char *path, long sample_rate)
 	start_track(0);
 }
 
+void open_data(char *data, int length, long sample_rate)
+{
+	gme_open_data(data,length,&emu,sample_rate);
+	start_track(0);
+}
+
 void close_file(void)
 {
+	gme_free_info(track_info_);
 	gme_delete( emu );
 }
 
