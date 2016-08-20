@@ -122,5 +122,8 @@ clean:
 install:
 	cp $(EXECUTABLE) ~/.config/retroarch/cores
 	cp $(INFO) ~/.config/retroarch/cores
-	
-.PHONY: clean install
+
+test:
+	retroarch --verbose -L $(DESTDIR)/usr/local/lib/libretro/$(EXECUTABLE) "./test/Final Fantasy 6 [ff6].zip"
+
+.PHONY: clean install test
