@@ -19,7 +19,7 @@ endif
 ifeq ($(shell uname -m),)
    arch = i686
 else
-   arch = ($(shell uname -m) 
+   arch = ($(shell uname -m)
 endif
 
 #set extension and lib path
@@ -88,7 +88,7 @@ SOURCES_CXX := deps/game-music-emu/gme/Ay_Apu.cpp \
 			deps/game-music-emu/gme/Vgm_Emu.cpp \
 			deps/game-music-emu/gme/Vgm_Emu_Impl.cpp \
 			deps/game-music-emu/gme/Ym2413_Emu.cpp \
-			deps/game-music-emu/gme/Ym2612_Emu.cpp 
+			deps/game-music-emu/gme/Ym2612_Emu.cpp
 
 SOURCES_C    := src/libretro.c \
 				src/graphics.c \
@@ -109,7 +109,7 @@ OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(fpic) -c -o $@ $<
-    
+
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
 
@@ -119,7 +119,7 @@ clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
 
 install:
-	cp $(EXECUTABLE) $(DESTDIR)/usr/local/lib/libretro
-	cp $(INFO) $(DESTDIR)/usr/local/lib/libretro
+	cp $(EXECUTABLE) ~/.config/retroarch/cores
+	cp $(INFO) ~/.config/retroarch/cores
 	
 .PHONY: clean install
