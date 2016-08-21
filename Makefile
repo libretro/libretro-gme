@@ -94,6 +94,7 @@ SOURCES_C    := src/libretro.c \
 				src/graphics.c \
 				src/player.c \
 				src/playlist.c \
+				src/log.c \
 				deps/zlib-1.2.8/adler32.c \
 				deps/zlib-1.2.8/crc32.c \
 				deps/zlib-1.2.8/inflate.c \
@@ -124,6 +125,6 @@ install:
 	cp $(INFO) ~/.config/retroarch/cores
 
 test:
-	retroarch --verbose -L $(DESTDIR)/usr/local/lib/libretro/$(EXECUTABLE) "./test/Final Fantasy 6 [ff6].zip"
+	retroarch --verbose -L ~/.config/retroarch/cores/$(EXECUTABLE) "./test/Final Fantasy 6 [ff6].zip"
 
 .PHONY: clean install test

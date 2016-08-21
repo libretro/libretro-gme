@@ -6,15 +6,14 @@
 #include "libretro.h"
 #include "graphics.h"
 #include "player.h"
-#include "playlist.h"
+#include "log.h"
 
 // Static globals
 static surface *framebuffer = NULL;;
 static uint16_t previnput = 0;
-static playlist *plist = NULL;;
 
 // Callbacks
-static retro_log_printf_t log_cb;
+
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
@@ -84,15 +83,11 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
 
 void retro_init(void)
 {
-    /* set up some logging */
-    struct retro_log_callback log;
-    unsigned level = 0;
-    if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
-        log_cb = log.log;
-    else
-        log_cb = NULL;
-    // the performance level is guide to frontend to give an idea of how intensive this core is to run
-    environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
+  unsigned level = 0;
+  /* set up some logging */
+  init_log(environ_cb);
+  // the performance level is guide to frontend to give an idea of how intensive this core is to run
+  environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
 	framebuffer = create_surface(320,240,2);
 }
 
@@ -102,9 +97,9 @@ void retro_deinit(void) {
 }
 
 // Reset gme
-void retro_reset(void) 
-{ 
-	
+void retro_reset(void)
+{
+
 }
 
 // Run a single frame
@@ -124,27 +119,27 @@ void retro_run(void)
 		}
 	}
 	input = realinput & ~previnput;
-	previnput = realinput;	
+	previnput = realinput;
 	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_L))
 	{
 		prev_track();
 	}
-	
+
 	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_R))
 	{
 		next_track();
 	}
-	
+
 	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_START))
 	{
 		play_pause();
 	}
 	//graphic handling
 	memset(framebuffer->pixel_data,0,framebuffer->bytes_per_pixel * framebuffer->width * framebuffer->height);
-	//draw_ui();
+	draw_ui();
+  video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
+  //audio handling
 	audio_batch_cb(play(),1470);
-    video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
-	//audio handling
 }
 
 // File Loading
@@ -155,28 +150,20 @@ bool retro_load_game(const struct retro_game_info *info)
 	int i;
 	if (info && info->data) { // ensure there is ROM data
 		//open_file( info->path, sample_rate);
-		plist = load_playlist(info->path,sample_rate);
-		for(int i=0;i<plist->num_tracks;i++)
-		{
-			sprintf(message,"Track %s (%i/%i) data_length %i",plist->entries[i]->track_name,plist->entries[i]->track_number,plist->num_tracks,plist->entries[i]->track_data_length);
-			handle_info(message);			
-		}
-		//open_data(plist->entries[0]->track_data,plist->entries[0]->track_data_length,sample_rate);
+    open_file(info->path,sample_rate);
 		return true;
 	}
 	return true;
 }
 
-bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info) 
-{ 
+bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info)
+{
    return false;
 }
 
-void retro_unload_game(void) 
+void retro_unload_game(void)
 {
 	close_file();
-	if(plist!=NULL)
-		unload_playlist(plist);
 }
 
 void draw_ui(void)
@@ -207,22 +194,4 @@ int draw_text_centered(char* text,char r, char g, char b, int y, int maxlen)
 	msglen = get_string_length(text);
 	draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y,get_track_elapsed_frames());
 	return max(msglen,maxlen);
-}
-
-void handle_error( const char* error )
-{
-	char str [256];
-	if(error) {
-		sprintf( str, "Error: %s", error );
-		log_cb(RETRO_LOG_ERROR, str ); 		
-	}
-}
-
-void handle_info( const char* info )
-{
-	char str [256];
-	if(info) {
-		sprintf( str, "Info: %s\n", info );
-		log_cb(RETRO_LOG_INFO, str ); 		
-	}
 }

@@ -1,12 +1,14 @@
 #include "player.h"
 #include <string.h>
 #include <boolean.h>
+#include "playlist.h"
 
-static int current_track;
+static playlist *plist = NULL;
+static playlist_entry *entry = NULL;
 Music_Emu* emu = NULL;
 static short audio_buffer[8192];
-gme_info_t* track_info_;
 static bool is_playing_;
+static long sample_rate_;
 
 bool is_emu_loaded(void)
 {
@@ -15,34 +17,48 @@ bool is_emu_loaded(void)
 
 void open_file(const char *path, long sample_rate)
 {
-	gme_open_file(path, &emu, sample_rate );
-	start_track(0);
-}
-
-void open_data(char *data, int length, long sample_rate)
-{
-	gme_open_data(data,length,&emu,sample_rate);
-	start_track(0);
+	sample_rate_ = sample_rate;
+	plist = load_playlist(path,sample_rate_);
+	start_track(plist->current_track);
 }
 
 void close_file(void)
 {
-	gme_free_info(track_info_);
 	gme_delete( emu );
+	if(plist!=NULL)
+		unload_playlist(plist);
 }
 
 void start_track(int track)
 {
 	memset(audio_buffer,0,8192);
-	current_track = track;	
-	gme_track_info( emu, &track_info_, track );
-	if ( track_info_->length <= 0 )
-		track_info_->length = track_info_->intro_length +
-					track_info_->loop_length * 2;	
-	if ( track_info_->length <= 0 )
-		track_info_->length = (long) (2.5 * 60 * 1000);
-	gme_start_track(emu, current_track);
-	is_playing_ = true;
+	plist->current_track = track;
+	entry = plist->entries[track];
+	if(plist->type == GME_ZIP)
+	{
+		if(emu !=NULL)
+			gme_delete (emu);
+		emu = gme_new_emu(entry->track_type,sample_rate_);
+		gme_load_data(emu,entry->track_data,entry->track_data_length);
+		gme_start_track(emu, 0);
+		is_playing_ = true;
+	}
+	else if(plist->type == GME_FILE)
+	{
+		if(emu == NULL)
+		{
+			emu = gme_new_emu(entry->track_type,sample_rate_);
+			gme_load_data(emu,plist->playlist_data,plist->playlist_data_length);
+		}
+		gme_start_track(emu, track);
+		is_playing_ = true;
+	}
+	else
+	{
+		emu = NULL;
+		is_playing_ = false;
+	}
+
 }
 
 short *play(void)
@@ -51,9 +67,9 @@ short *play(void)
 	{
 		if(gme_track_ended(emu))
 		{
-			if(current_track< (gme_track_count(emu)-1))
+			if(plist->current_track< (plist->num_tracks-1))
 			{
-				start_track(++current_track);
+				start_track(++plist->current_track);
 			}
 			else
 			{
@@ -62,7 +78,7 @@ short *play(void)
 		}
 		else
 		{
-			gme_play( emu, 2048, audio_buffer );			
+			gme_play( emu, 2048, audio_buffer );
 		}
 	}
 	else
@@ -74,41 +90,41 @@ short *play(void)
 
 void next_track(void)
 {
-	if(current_track< (gme_track_count(emu)-1))
+	if(plist->current_track< (plist->num_tracks-1))
 	{
-		start_track(++current_track);
+		start_track(++plist->current_track);
 	}
 }
 
 void prev_track(void)
 {
-	if(current_track > 0)
+	if(plist->current_track > 0)
 	{
-		start_track(--current_track);
+		start_track(--plist->current_track);
 	}
 }
 
 char *get_game_name(char *buf)
 {
-	sprintf(buf, "%s",track_info_->game);
+	sprintf(buf, "%s",plist->game_name);
 	return buf;
 }
 
 char *get_track_count(char *buf)
 {
-	sprintf(buf, "%d/%d",current_track+1,gme_track_count(emu));
+	sprintf(buf, "%d/%d",entry->track_number,plist->num_tracks);
 	return buf;
 }
 
 char *get_song_name(char *buf)
 {
-	sprintf(buf, "%s",strcmp(track_info_->song,"") ? track_info_->song : "-");
+	sprintf(buf, "%s",entry->track_name);
 	return buf;
 }
 
 char *get_track_position(char *buf)
 {
-	long seconds = track_info_->length / 1000;
+	long seconds = entry->track_length / 1000;
 	long elapsed_seconds = gme_tell(emu) / 1000;
 	sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
 	return buf;
