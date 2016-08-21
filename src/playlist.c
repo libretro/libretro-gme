@@ -37,7 +37,6 @@ void load_gme_file(playlist *playlist, long sample_rate)
 	gme_info_t* track_info;
 	gme_type_t track_type;
 	playlist_entry *entry;
-	char err_msg[256];
 	int i;
 	char *ext;
 	//set playlist type
@@ -67,7 +66,7 @@ void load_gme_file(playlist *playlist, long sample_rate)
 	else if(strcmp(ext,"vgz") == 0)
 		track_type = gme_vgz_type;
 	//read file data
-	fp = fopen(playlist->filename,"r");
+	fp = fopen(playlist->filename,"rb");
 	fseek (fp,0,SEEK_END);
 	playlist->playlist_data_length = ftell(fp);
 	rewind(fp);
@@ -87,12 +86,9 @@ void load_gme_file(playlist *playlist, long sample_rate)
 			playlist->entries[i] = malloc(sizeof(playlist_entry));
 			entry = playlist->entries[i];
 			gme_track_info(temp_emu, &track_info,i);
-			sprintf(err_msg,"Track name: %s",track_info->game);
-			handle_info(err_msg);
 			if(strcmp(track_info->game,"")==0)
 			{
 				char *basename = strrchr(playlist->filename,'/') +1;
-				handle_info(basename);
 				playlist->game_name = malloc((strlen(basename)+1) * sizeof(char));
 				strcpy(playlist->game_name,basename);
 			}

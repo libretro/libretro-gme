@@ -2,6 +2,7 @@
 #include <string.h>
 #include <boolean.h>
 #include "playlist.h"
+#include "log.h"
 
 static playlist *plist = NULL;
 static playlist_entry *entry = NULL;
@@ -31,6 +32,7 @@ void close_file(void)
 
 void start_track(int track)
 {
+	char message[256];
 	memset(audio_buffer,0,8192);
 	plist->current_track = track;
 	entry = plist->entries[track];
@@ -47,18 +49,27 @@ void start_track(int track)
 	{
 		if(emu == NULL)
 		{
-			emu = gme_new_emu(entry->track_type,sample_rate_);
-			gme_load_data(emu,plist->playlist_data,plist->playlist_data_length);
+			if(entry->track_type != NULL)
+			{
+				emu = gme_new_emu(entry->track_type,sample_rate_);
+				gme_load_data(emu,plist->playlist_data,plist->playlist_data_length);
+				is_playing_ = true;
+			}
+			else
+			{
+				strcpy(message,"Unknown track type");
+				handle_error(message);
+				is_playing_ = false;				
+			}
 		}
-		gme_start_track(emu, track);
-		is_playing_ = true;
+		if(is_playing_)
+			gme_start_track(emu, track);
 	}
 	else
 	{
 		emu = NULL;
 		is_playing_ = false;
 	}
-
 }
 
 short *play(void)
