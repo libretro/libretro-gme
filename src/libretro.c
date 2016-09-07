@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "libretro.h"
+#include <libretro.h>
+
 #include "graphics.h"
 #include "player.h"
 #include "log.h"

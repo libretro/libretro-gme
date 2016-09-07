@@ -1,12 +1,12 @@
-DEPS_DIR          := $(CORE_DIR)/deps
-GME_DIR				:= $(DEPS_DIR)/game-music-emu
-LIBRETRO_COMM_DIR := $(DEPS_DIR)/libretro-common
+DEPS_DIR          = $(CORE_DIR)/deps
+GME_DIR				= $(DEPS_DIR)/game-music-emu
+LIBRETRO_COMM_DIR = $(DEPS_DIR)/libretro-common
 
-INCFLAGS 			:= -I. \
-			  -I$(LIBRETRO_COMM_DIR)/include \
-			  -I$(DEPS_DIR)/game-music-emu/gme \
-			  -I$(DEPS_DIR)/zlib-1.2.8 \
-			  -I$(DEPS_DIR)/zlib-1.2.8/contrib/minizip
+INCFLAGS 			= -I$(CORE_DIR) \
+		     			  -I$(LIBRETRO_COMM_DIR)/include \
+						  -I$(DEPS_DIR)/game-music-emu/gme \
+						  -I$(DEPS_DIR)/zlib-1.2.8 \
+						  -I$(DEPS_DIR)/zlib-1.2.8/contrib/minizip
 
 SOURCES_CXX := \
 					$(GME_DIR)/gme/Ay_Apu.cpp \
