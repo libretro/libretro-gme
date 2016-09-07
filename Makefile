@@ -36,15 +36,15 @@ endif
 CC = gcc
 CXX = g++
 
-TARGET_NAME := gme_libretro
+TARGET_NAME := gme
 
 include Makefile.common
 
-CFLAGS += -Wall -std=c99 $(INCFLAGS)
+CFLAGS   += -Wall -std=c99 $(INCFLAGS)
 CXXFLAGS += -Wall $(INCFLAGS)
-LDFLAGS += -shared
+LDFLAGS  += -shared
 
-EXECUTABLE = $(TARGET_NAME)$(EXT)
+EXECUTABLE = $(TARGET_NAME)_libretro$(EXT)
 INFO = $(TARGET_NAME).info
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
