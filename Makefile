@@ -8,12 +8,12 @@ ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
    platform = win
-else ifneq ($(findstring win,$(shell uname -a)),)
-   platform = win
 else ifneq ($(findstring MINGW,$(shell uname -a)),)
-   platform = mingw
+   platform = win
 else ifneq ($(findstring Darwin,$(shell uname -a)),)
    platform = osx
+else ifneq ($(findstring win,$(shell uname -a)),)
+   platform = win
 endif
 endif
 
@@ -26,13 +26,6 @@ endif
 
 #set extension and lib path
 
-ifneq ($(filter $(platform),win mingw),)
-EXT = .dll
-else ifeq ($(platform), unix)
-EXT = .so
-fpic = -fPIC
-endif
-
 CC = gcc
 CXX = g++
 
@@ -40,6 +33,7 @@ TARGET_NAME := gme
 
 # Unix
 ifeq ($(platform), unix)
+	fpic = -fPIC
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=link.T
