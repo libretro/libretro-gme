@@ -275,11 +275,11 @@ void unload_playlist(playlist *playlist)
 	if(playlist->entries!=NULL)
 	{
 		for(i=0;i<playlist->num_tracks;i++)
-		{
-			if(playlist->entries[i]->track_data != NULL)
-				free(playlist->entries[i]->track_data);
-				free(playlist->entries[i]);
-		}
+      {
+         if(playlist->entries[i]->track_data != NULL)
+            free(playlist->entries[i]->track_data);
+         free(playlist->entries[i]);
+      }
 	}
 	if(playlist->filename!=NULL)
 	{

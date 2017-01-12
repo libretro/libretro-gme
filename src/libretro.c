@@ -148,12 +148,13 @@ bool retro_load_game(const struct retro_game_info *info)
 {
 	long sample_rate = 44100;
 	char message[256];
-	int i;
-	if (info && info->data) { // ensure there is ROM data
-		//open_file( info->path, sample_rate);
-    open_file(info->path,sample_rate);
-		return true;
-	}
+	if (info && info->data)
+   {
+      // ensure there is ROM data
+      //open_file( info->path, sample_rate);
+      open_file(info->path,sample_rate);
+      return true;
+   }
 	return true;
 }
 
