@@ -263,7 +263,7 @@ endif
 CFLAGS   += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
 CXXFLAGS += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
 
-ifneq (,$(findstring msvc,$(platform)))
+ifeq (,$(findstring msvc,$(platform)))
 LDFLAGS  += -shared
 endif
 
