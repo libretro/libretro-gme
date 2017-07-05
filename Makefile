@@ -280,7 +280,7 @@ ifneq (,$(findstring msvc,$(platform)))
 	LINKOUT = -out:
 	LD = link.exe
 else
-	LD = $(CC)
+	LD = $(CXX)
 endif
 
 %.o: %.cpp
