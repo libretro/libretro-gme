@@ -57,44 +57,45 @@ void handle_info( const char* info);
  */
 void retro_get_system_info(struct retro_system_info *info)
 {
-    memset(info, 0, sizeof(*info));
-    info->library_name = "Game Music Emulator";
-    info->library_version = "v0.6.1";
-    info->need_fullpath = false;
-    info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz|zip";
-	info->block_extract = true;
+   memset(info, 0, sizeof(*info));
+   info->library_name = "Game Music Emulator";
+   info->library_version = "v0.6.1";
+   info->need_fullpath = false;
+   info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz|zip";
+   info->block_extract = true;
 }
 
 /*
  * Tell libretro about the AV system; the fps, sound sample rate and the
  * resolution of the display.
  */
-void retro_get_system_av_info(struct retro_system_av_info *info) {
-    int pixel_format = RETRO_PIXEL_FORMAT_RGB565;
-    memset(info, 0, sizeof(*info));
-    info->timing.fps            = 60.0f;
-    info->timing.sample_rate    = 44100;
-    info->geometry.base_width   = 320;
-    info->geometry.base_height  = 240;
-    info->geometry.max_width    = 320;
-    info->geometry.max_height   = 240;
-    info->geometry.aspect_ratio = 320.0f / 240.0f;
-    environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
+void retro_get_system_av_info(struct retro_system_av_info *info)
+{
+   int pixel_format = RETRO_PIXEL_FORMAT_RGB565;
+   memset(info, 0, sizeof(*info));
+   info->timing.fps            = 60.0f;
+   info->timing.sample_rate    = 44100;
+   info->geometry.base_width   = 320;
+   info->geometry.base_height  = 240;
+   info->geometry.max_width    = 320;
+   info->geometry.max_height   = 240;
+   info->geometry.aspect_ratio = 320.0f / 240.0f;
+   environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
 }
 
 void retro_init(void)
 {
-  unsigned level = 0;
-  /* set up some logging */
-  init_log(environ_cb);
-  // the performance level is guide to frontend to give an idea of how intensive this core is to run
-  environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
-	framebuffer = create_surface(320,240,2);
+   unsigned level = 0;
+   /* set up some logging */
+   init_log(environ_cb);
+   // the performance level is guide to frontend to give an idea of how intensive this core is to run
+   environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
+   framebuffer = create_surface(320,240,2);
 }
 
 // End of retrolib
 void retro_deinit(void) {
-	free(framebuffer);
+   free(framebuffer);
 }
 
 // Reset gme
@@ -106,50 +107,44 @@ void retro_reset(void)
 // Run a single frame
 void retro_run(void)
 {
-	uint16_t input = 0;
-	uint16_t realinput = 0;
-	int i;
+   uint16_t input = 0;
+   uint16_t realinput = 0;
+   int i;
 
-	// input handling
-	input_poll_cb();
-	for(i=0;i<16;i++)
-	{
-		if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i))
-		{
-			realinput |= 1<<i;
-		}
-	}
-	input = realinput & ~previnput;
-	previnput = realinput;
-	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_L))
-	{
-		prev_track();
-	}
+   // input handling
+   input_poll_cb();
+   for(i=0;i<16;i++)
+   {
+      if(input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i))
+         realinput |= 1<<i;
+   }
+   input = realinput & ~previnput;
+   previnput = realinput;
 
-	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_R))
-	{
-		next_track();
-	}
+   if(input & (1<<RETRO_DEVICE_ID_JOYPAD_L))
+      prev_track();
 
-	if(input & (1<<RETRO_DEVICE_ID_JOYPAD_START))
-	{
-		play_pause();
-	}
-	//graphic handling
-	memset(framebuffer->pixel_data,0,framebuffer->bytes_per_pixel * framebuffer->width * framebuffer->height);
-	draw_ui();
-  video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
-  //audio handling
-	audio_batch_cb(play(),1470);
+   if(input & (1<<RETRO_DEVICE_ID_JOYPAD_R))
+      next_track();
+
+   if(input & (1<<RETRO_DEVICE_ID_JOYPAD_START))
+      play_pause();
+
+   //graphic handling
+   memset(framebuffer->pixel_data,0,framebuffer->bytes_per_pixel * framebuffer->width * framebuffer->height);
+   draw_ui();
+   video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
+   //audio handling
+   audio_batch_cb(play(),1470);
 }
 
 // File Loading
 bool retro_load_game(const struct retro_game_info *info)
 {
-	char message[256];
-	long sample_rate = 44100;
+   char message[256];
+   long sample_rate = 44100;
 
-	if (info && info->data)
+   if (info && info->data)
    {
       // ensure there is ROM data
       //open_file( info->path, sample_rate);
@@ -157,7 +152,7 @@ bool retro_load_game(const struct retro_game_info *info)
       return true;
    }
 
-	return false;
+   return false;
 }
 
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info)
@@ -167,35 +162,34 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 
 void retro_unload_game(void)
 {
-	close_file();
+   close_file();
 }
 
 void draw_ui(void)
 {
-	char *message = NULL;
-	int maxlen = 0;
-	message = malloc(100);
-	//lines
-	draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
-	draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
-	draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
-	draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
-	draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
-	draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
-	//text
-	maxlen = draw_text_centered(get_game_name(message),31,0,0,100,maxlen);
-	maxlen = draw_text_centered(get_track_count(message),0,63,0,110,maxlen);
-	maxlen = draw_text_centered(get_song_name(message),0,0,31,120,maxlen);
-	maxlen = draw_text_centered(get_track_position(message),31,63,31,130,maxlen);
-	maxlen = min(maxlen,280);
-	draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
-	free(message);
+   int maxlen    = 0;
+   char *message = malloc(100);
+
+   //lines
+   draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
+   draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
+   draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
+   draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
+   draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
+   draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
+   //text
+   maxlen = draw_text_centered(get_game_name(message),31,0,0,100,maxlen);
+   maxlen = draw_text_centered(get_track_count(message),0,63,0,110,maxlen);
+   maxlen = draw_text_centered(get_song_name(message),0,0,31,120,maxlen);
+   maxlen = draw_text_centered(get_track_position(message),31,63,31,130,maxlen);
+   maxlen = min(maxlen,280);
+   draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
+   free(message);
 }
 
 int draw_text_centered(char* text,char r, char g, char b, int y, int maxlen)
 {
-	int msglen;
-	msglen = get_string_length(text);
-	draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y,get_track_elapsed_frames());
-	return max(msglen,maxlen);
+   int msglen = get_string_length(text);
+   draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y,get_track_elapsed_frames());
+   return max(msglen,maxlen);
 }
