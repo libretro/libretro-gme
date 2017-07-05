@@ -262,7 +262,10 @@ endif
 
 CFLAGS   += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
 CXXFLAGS += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
+
+ifneq (,$(findstring msvc,$(platform)))
 LDFLAGS  += -shared
+endif
 
 EXECUTABLE = $(TARGET)
 INFO = $(TARGET_NAME).info
