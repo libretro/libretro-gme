@@ -4,15 +4,6 @@
 #include <stdint.h>
 #include <boolean.h>
 
-#define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
-#define min(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
-
 #define set_pixel(surf,x,y,color) ((unsigned short *)surf->pixel_data)[(x)+((y)*surf->width)] = color
 #define get_pixel(surf,x,y) ((unsigned short *)surf->pixel_data)[(x)+((y)*surf->width)]
 #define is_font_pixel(x,y) (((unsigned short *)font.pixel_data)[(x)+((y)*font.width)] == 0 ? 1 : 0)
