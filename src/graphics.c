@@ -113,9 +113,10 @@ void draw_box(surface *surf, unsigned short color, int x0, int y0, int x1, int y
 
 void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w, int h)
 {
-	for(int y=pos_y;y<(pos_y+h);y++)
+   int y, x;
+	for(y=pos_y;y<(pos_y+h);y++)
 	{
-		for(int x=pos_x;x<(pos_x+w);x++)
+		for(x=pos_x;x<(pos_x+w);x++)
 			set_pixel(surf,x,y,color);
 	}	
 }
