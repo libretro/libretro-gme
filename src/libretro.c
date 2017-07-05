@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include <libretro.h>
+#include <retro_miscellaneous.h>
 
 #include "graphics.h"
 #include "player.h"
@@ -49,8 +50,8 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 static int draw_text_centered(char* text,char r, char g, char b, int y, int maxlen)
 {
    int msglen = get_string_length(text);
-   draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y,get_track_elapsed_frames());
-   return max(msglen,maxlen);
+   draw_string(framebuffer,get_color(r,g,b),text,MAX(160-(msglen/2),21), y,get_track_elapsed_frames());
+   return MAX(msglen,maxlen);
 }
 
 // Custom functions
@@ -71,7 +72,7 @@ static void draw_ui(void)
    maxlen = draw_text_centered(get_track_count(message),0,63,0,110,maxlen);
    maxlen = draw_text_centered(get_song_name(message),0,0,31,120,maxlen);
    maxlen = draw_text_centered(get_track_position(message),31,63,31,130,maxlen);
-   maxlen = min(maxlen,280);
+   maxlen = MIN(maxlen,280);
    draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
    free(message);
 }
@@ -169,7 +170,6 @@ void retro_run(void)
 // File Loading
 bool retro_load_game(const struct retro_game_info *info)
 {
-   char message[256];
    long sample_rate = 44100;
 
    // ensure there is ROM data
