@@ -150,7 +150,8 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
 	int modulo = 0;
 	int frame_delay = 2;
 	int msglen = strlen(text);
-	surface *temp_surface = create_surface((msglen*8),8,2);	
+   surface *clipped_surface = NULL;
+	surface *temp_surface    = create_surface((msglen*8),8,2);	
 
 	for(x=0;x<msglen;x++)
 		draw_letter(temp_surface,color,text[x],(x*8),0);
@@ -163,7 +164,8 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
 		x_offset = MAX(x_offset,0); //clamp left to add delay
 		x_offset = MIN(x_offset,delta); //clamp right to add delay
 	}
-	surface *clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,21,21,299,219);
+
+	clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,21,21,299,219);
 	if(clipped_surface !=NULL)
 	{
 		copy_surface(clipped_surface,surf,0,0,pos_x,pos_y,clipped_surface->width,clipped_surface->height);
