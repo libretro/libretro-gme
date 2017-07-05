@@ -46,9 +46,36 @@ size_t retro_get_memory_size(unsigned id){ return 0; }
 void retro_cheat_reset(void) {}
 void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
+static int draw_text_centered(char* text,char r, char g, char b, int y, int maxlen)
+{
+   int msglen = get_string_length(text);
+   draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y,get_track_elapsed_frames());
+   return max(msglen,maxlen);
+}
+
 // Custom functions
-void draw_ui(void);
-int draw_text_centered(char* text, char r, char g, char b, int y, int maxlen);
+static void draw_ui(void)
+{
+   int maxlen    = 0;
+   char *message = malloc(100);
+
+   //lines
+   draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
+   draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
+   draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
+   draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
+   draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
+   draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
+   //text
+   maxlen = draw_text_centered(get_game_name(message),31,0,0,100,maxlen);
+   maxlen = draw_text_centered(get_track_count(message),0,63,0,110,maxlen);
+   maxlen = draw_text_centered(get_song_name(message),0,0,31,120,maxlen);
+   maxlen = draw_text_centered(get_track_position(message),31,63,31,130,maxlen);
+   maxlen = min(maxlen,280);
+   draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
+   free(message);
+}
+
 void handle_error( const char* error );
 void handle_info( const char* info);
 
@@ -144,15 +171,12 @@ bool retro_load_game(const struct retro_game_info *info)
    char message[256];
    long sample_rate = 44100;
 
-   if (info && info->data)
-   {
-      // ensure there is ROM data
-      //open_file( info->path, sample_rate);
-      open_file(info->path,sample_rate);
-      return true;
-   }
+   // ensure there is ROM data
+   if (!info || !info->data)
+      return false;
 
-   return false;
+   open_file(info->path,sample_rate);
+   return true;
 }
 
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info)
@@ -165,31 +189,4 @@ void retro_unload_game(void)
    close_file();
 }
 
-void draw_ui(void)
-{
-   int maxlen    = 0;
-   char *message = malloc(100);
 
-   //lines
-   draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
-   draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
-   draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
-   draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
-   draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
-   draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
-   //text
-   maxlen = draw_text_centered(get_game_name(message),31,0,0,100,maxlen);
-   maxlen = draw_text_centered(get_track_count(message),0,63,0,110,maxlen);
-   maxlen = draw_text_centered(get_song_name(message),0,0,31,120,maxlen);
-   maxlen = draw_text_centered(get_track_position(message),31,63,31,130,maxlen);
-   maxlen = min(maxlen,280);
-   draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
-   free(message);
-}
-
-int draw_text_centered(char* text,char r, char g, char b, int y, int maxlen)
-{
-   int msglen = get_string_length(text);
-   draw_string(framebuffer,get_color(r,g,b),text,max(160-(msglen/2),21), y,get_track_elapsed_frames());
-   return max(msglen,maxlen);
-}
