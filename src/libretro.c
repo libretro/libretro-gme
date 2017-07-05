@@ -121,7 +121,8 @@ void retro_init(void)
 }
 
 // End of retrolib
-void retro_deinit(void) {
+void retro_deinit(void)
+{
    free(framebuffer);
 }
 
