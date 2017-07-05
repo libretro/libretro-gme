@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <retro_miscellaneous.h>
+
 unsigned short get_color(char r, char g, char b)
 {
-	unsigned short color;
-	color= (r << 11) | (g << 5) | b;
+	unsigned short color= (r << 11) | (g << 5) | b;
 	return color;
 }
 
@@ -15,10 +16,11 @@ surface *create_surface(unsigned int width, unsigned int height, unsigned int bp
 	if(newsurf==NULL)
 		return NULL;
 	newsurf->pixel_data = malloc(width*height*bpp);
-	if(newsurf->pixel_data==NULL) {
-		free(newsurf);
-		return NULL;
-	}
+	if(newsurf->pixel_data==NULL)
+   {
+      free(newsurf);
+      return NULL;
+   }
 	memset(newsurf->pixel_data,0,width*height*bpp);
 	newsurf->width = width;
 	newsurf->height = height;
@@ -41,13 +43,11 @@ surface *clip_surface(surface *src_surf, int x_src, int y_src, int x0, int y0, i
 	surface *clipped_surf = NULL;
 	//check if completely out of bounds
 	if( (x_src+src_surf->width) <x0 || x_src > x1 || (y_src+src_surf->height) < y0 || y_src > y1)
-	{
 		return clipped_surf;
-	}
-	wx0 = max(x_src,x0);
-	wy0 = max(y_src,y0);
-	wx1 = min(x_src+src_surf->width,x1);
-	wy1 = min(y_src+src_surf->height,y1);
+	wx0 = MAX(x_src,x0);
+	wy0 = MAX(y_src,y0);
+	wx1 = MIN(x_src+src_surf->width,x1);
+	wy1 = MIN(y_src+src_surf->height,y1);
 	lx = wx0 - x_src;
 	ly = wy0 - y_src;
 	lw = wx1 - wx0;
@@ -75,18 +75,16 @@ void draw_line(surface *surf, unsigned short color, int start_x, int start_y, in
 {
 	if(start_x==end_x) //vertical line
 	{
-		for(int y=start_y;y<=end_y;y++)
-		{
+      int y;
+		for(y=start_y;y<=end_y;y++)
 			set_pixel(surf,start_x,y,color);
-		}
 	}
 	else if(start_y==end_y) // horizontal line
-	{
-		for(int x=start_x;x<=end_x;x++)
-		{
-			set_pixel(surf,x,start_y,color) = color;
-		}
-	}
+   {
+      int x;
+      for(x=start_x;x<=end_x;x++)
+         set_pixel(surf,x,start_y,color) = color;
+   }
 	else 
 	{
 		// Bresenham line algorithm, copied from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm#C
@@ -94,13 +92,14 @@ void draw_line(surface *surf, unsigned short color, int start_x, int start_y, in
 		int dx = abs(end_x-start_x), sx = start_x<end_x ? 1 : -1;
 		int dy = abs(end_y-start_y), sy = start_y<end_y ? 1 : -1; 
 		int err = (dx>dy ? dx : -dy)/2, e2;
-		for(;;){
-			set_pixel(surf,x,y,color);
-			if (x==end_x && y==end_y) break;
-			e2 = err;
-			if (e2 >-dx) { err -= dy; x += sx; }
-			if (e2 < dy) { err += dx; y += sy; }
-		}
+		for(;;)
+      {
+         set_pixel(surf,x,y,color);
+         if (x==end_x && y==end_y) break;
+         e2 = err;
+         if (e2 >-dx) { err -= dy; x += sx; }
+         if (e2 < dy) { err += dx; y += sy; }
+      }
 	}
 }
 
@@ -117,14 +116,13 @@ void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w
 	for(int y=pos_y;y<(pos_y+h);y++)
 	{
 		for(int x=pos_x;x<(pos_x+w);x++)
-		{
 			set_pixel(surf,x,y,color);
-		}
 	}	
 }
 
 void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, int pos_y)
 {
+   int y, x;
 	int charx = 0;
 	int chary = 0;
 	//calculate letter offset
@@ -132,20 +130,19 @@ void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, in
 	chary = (letter >> 4);
 	charx *= 8;
 	chary *= 8;
-	for(int y=0;y<8;y++)
+	for(y=0;y<8;y++)
 	{
-		for(int x=0;x<8;x++)
+		for(x=0;x<8;x++)
 		{
 			if(is_font_pixel(charx+x,chary+y))
-			{
 				set_pixel(surf,pos_x+x,pos_y+y,color);
-			}
 		}
 	}		
 }
 
 void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter)
 {
+   int x;
 	int x_offset = 0;
 	int delta = 0;
 	int delay = 30;
@@ -153,17 +150,17 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
 	int frame_delay = 2;
 	int msglen = strlen(text);
 	surface *temp_surface = create_surface((msglen*8),8,2);	
-	for(int x=0;x<msglen;x++)
-	{
+
+	for(x=0;x<msglen;x++)
 		draw_letter(temp_surface,color,text[x],(x*8),0);
-	}
+
 	if((msglen*8)>280)
 	{
 		delta = (msglen*8) -280;
 		modulo = delta + (delay * 2);
 		x_offset = (modulo - abs(framecounter/frame_delay % (2*modulo) - modulo)) - delay; // triangle function
-		x_offset = max(x_offset,0); //clamp left to add delay
-		x_offset = min(x_offset,delta); //clamp right to add delay
+		x_offset = MAX(x_offset,0); //clamp left to add delay
+		x_offset = MIN(x_offset,delta); //clamp right to add delay
 	}
 	surface *clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,21,21,299,219);
 	if(clipped_surface !=NULL)
