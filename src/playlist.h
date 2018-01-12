@@ -26,8 +26,8 @@ typedef struct {
 } playlist;
 
 playlist *load_playlist(const char *path,long sample_rate);
-void load_gme_file(playlist *playlist,long sample_rate);
-void load_zip(playlist *playlist,long sample_rate);
+bool load_gme_file(playlist *playlist,long sample_rate);
+bool load_zip(playlist *playlist,long sample_rate);
 void unload_playlist(playlist *playlist);
 
 #endif

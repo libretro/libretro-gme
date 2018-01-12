@@ -68,4 +68,10 @@ SOURCES_C    := $(CORE_DIR)/src/libretro.c \
 					 $(DEPS_DIR)/zlib-1.2.8/inffast.c \
 					 $(DEPS_DIR)/zlib-1.2.8/zutil.c \
 					 $(DEPS_DIR)/zlib-1.2.8/contrib/minizip/ioapi.c \
-					 $(DEPS_DIR)/zlib-1.2.8/contrib/minizip/unzip.c
+					 $(DEPS_DIR)/zlib-1.2.8/contrib/minizip/unzip.c \
+					 $(DEPS_DIR)/zlib-1.2.8/deflate.c \
+					 $(DEPS_DIR)/zlib-1.2.8/gzclose.c \
+					 $(DEPS_DIR)/zlib-1.2.8/gzlib.c \
+					 $(DEPS_DIR)/zlib-1.2.8/gzread.c \
+					 $(DEPS_DIR)/zlib-1.2.8/gzwrite.c \
+					 $(DEPS_DIR)/zlib-1.2.8/trees.c

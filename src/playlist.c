@@ -21,24 +21,31 @@ playlist *load_playlist(const char *path, long sample_rate)
 	ext = strrchr(path,'.') +1;
 	if(strcmp(ext,"zip")==0)
 	{
-		load_zip(new_playlist,sample_rate);
+		if(load_zip(new_playlist,sample_rate))
+			return new_playlist;
+		else
+			return NULL;
 	}
 	else
 	{
-		load_gme_file(new_playlist,sample_rate);
+		if(load_gme_file(new_playlist,sample_rate))
+			return new_playlist;
+		else
+			return NULL;
 	}
-	return new_playlist;
 }
 
-void load_gme_file(playlist *playlist, long sample_rate)
+bool load_gme_file(playlist *playlist, long sample_rate)
 {
 	FILE *fp;
 	Music_Emu* temp_emu;
 	gme_info_t* track_info;
 	gme_type_t track_type;
 	playlist_entry *entry;
+	gme_err_t err_msg;
 	int i;
 	char *ext;
+	bool loadSuccess;
 	//set playlist type
 	playlist->type = GME_FILE;
 	ext = strrchr(playlist->filename,'.') +1;
@@ -78,51 +85,63 @@ void load_gme_file(playlist *playlist, long sample_rate)
 	if(track_type !=NULL)
 	{
 		temp_emu = gme_new_emu(track_type,gme_info_only);
-		gme_load_data(temp_emu,playlist->playlist_data,playlist->playlist_data_length);
-		playlist->num_tracks = gme_track_count(temp_emu);
-		playlist->current_track = 0;
-		for(i=0;i<playlist->num_tracks;i++)
+		err_msg = gme_load_data(temp_emu,playlist->playlist_data,playlist->playlist_data_length);
+		if(err_msg==NULL)
 		{
-			playlist->entries[i] = malloc(sizeof(playlist_entry));
-			entry = playlist->entries[i];
-			gme_track_info(temp_emu, &track_info,i);
-			if(strcmp(track_info->game,"")==0)
+			playlist->num_tracks = gme_track_count(temp_emu);
+			playlist->current_track = 0;
+			for(i=0;i<playlist->num_tracks;i++)
 			{
-				char *basename = strrchr(playlist->filename,'/') +1;
-				playlist->game_name = malloc((strlen(basename)+1) * sizeof(char));
-				strcpy(playlist->game_name,basename);
+				playlist->entries[i] = malloc(sizeof(playlist_entry));
+				entry = playlist->entries[i];
+				gme_track_info(temp_emu, &track_info,i);
+				if(strcmp(track_info->game,"")==0)
+				{
+					char *basename = strrchr(playlist->filename,'/') +1;
+					playlist->game_name = malloc((strlen(basename)+1) * sizeof(char));
+					strcpy(playlist->game_name,basename);
+				}
+				else
+				{
+					playlist->game_name = malloc((strlen(track_info->game)+1) * sizeof(char));
+					strcpy(playlist->game_name,track_info->game);
+				}
+				entry->track_number = i + 1;
+				entry->track_data_length = 0;
+				entry->track_data = NULL;
+				entry->track_type = track_type;
+				entry->track_length = track_info->length;
+				if ( entry->track_length <= 0 )
+					entry->track_length = track_info->intro_length + track_info->loop_length * 2;
+				if ( entry->track_length <= 0 )
+					entry->track_length = (long) (2.5 * 60 * 1000);
+				if(strcmp(track_info->song,"") == 0)
+				{
+					entry->track_name = calloc(10,sizeof(char));
+					sprintf(entry->track_name, "Track %i",i+1);
+				}
+				else
+				{
+					entry->track_name = calloc(strlen(track_info->song)+1,sizeof(char));
+					strcpy(entry->track_name, track_info->song);
+				}
+				gme_free_info(track_info);
 			}
-			else
-			{
-				playlist->game_name = malloc((strlen(track_info->game)+1) * sizeof(char));
-				strcpy(playlist->game_name,track_info->game);
-			}
-			entry->track_number = i + 1;
-			entry->track_data_length = 0;
-			entry->track_data = NULL;
-			entry->track_type = track_type;
-			entry->track_length = track_info->length;
-			if ( entry->track_length <= 0 )
-				entry->track_length = track_info->intro_length + track_info->loop_length * 2;
-			if ( entry->track_length <= 0 )
-				entry->track_length = (long) (2.5 * 60 * 1000);
-			if(strcmp(track_info->song,"") == 0)
-			{
-				entry->track_name = calloc(10,sizeof(char));
-				sprintf(entry->track_name, "Track %i",i+1);
-			}
-			else
-			{
-				entry->track_name = calloc(strlen(track_info->song)+1,sizeof(char));
-				strcpy(entry->track_name, track_info->song);
-			}
-			gme_free_info(track_info);
+			loadSuccess = true;
+		}
+		else
+		{
+			handle_error(err_msg);
+			loadSuccess = false;
 		}
 		gme_delete( temp_emu );
 	}
+	else
+		loadSuccess = false;
+	return loadSuccess;
 }
 
-void load_zip(playlist *playlist, long sample_rate)
+bool load_zip(playlist *playlist, long sample_rate)
 {
 	char *ext;
 	unzFile uf = NULL;
@@ -158,6 +177,9 @@ void load_zip(playlist *playlist, long sample_rate)
 		{
 			sprintf(err_msg,"error %d with zipfile in unzGetCurrentFileInfo\n",err);
 			handle_error(err_msg);
+			free(playlist->entries[i]);
+			unzCloseCurrentFile(uf);
+			return false;
 		}
 		//initialize entry
 		entry->track_number = i + 1;
@@ -196,6 +218,9 @@ void load_zip(playlist *playlist, long sample_rate)
 		{
 				strcpy(err_msg,"error allocating memory");
 				handle_error(err_msg);
+				free(playlist->entries[i]);
+				unzCloseCurrentFile(uf);
+				return false;
 		}
 		//read file from zip
 		err = unzOpenCurrentFilePassword(uf,NULL);
@@ -203,6 +228,9 @@ void load_zip(playlist *playlist, long sample_rate)
 		{
 				sprintf(err_msg,"error %d with zipfile in unzOpenCurrentFilePassword\n",err);
 				handle_error(err_msg);
+				free(playlist->entries[i]);
+				unzCloseCurrentFile(uf);
+				return false;
 		}
 		//get data from zip
 		do {
@@ -211,6 +239,9 @@ void load_zip(playlist *playlist, long sample_rate)
 			{
 				sprintf(err_msg,"error %d with zipfile in unzReadCurrentFile\n",err);
 				handle_error(err_msg);
+				free(playlist->entries[i]);
+				unzCloseCurrentFile(uf);
+				return false;
 			}
 			if(err>0)
 			{
@@ -261,12 +292,13 @@ void load_zip(playlist *playlist, long sample_rate)
 		}
 		//read next file in zip
 		if ((i+1)<gi.number_entry)
-    {
-    	unzGoToNextFile(uf);
+    	{
+    		unzGoToNextFile(uf);
 		}
 	}
 	//close zip
 	unzCloseCurrentFile(uf);
+	return true;
 }
 
 void unload_playlist(playlist *playlist)

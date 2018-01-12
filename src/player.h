@@ -6,7 +6,7 @@
 #include "gme.h"
 
 bool is_emu_loaded(void);
-void open_file(const char *path, long sample_rate);
+bool open_file(const char *path, long sample_rate);
 void open_data(char *data, int length, long sample_rate);
 void close_file(void);
 void start_track(int track);

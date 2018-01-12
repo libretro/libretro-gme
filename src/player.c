@@ -16,11 +16,17 @@ bool is_emu_loaded(void)
 	return (emu != NULL);
 }
 
-void open_file(const char *path, long sample_rate)
+bool open_file(const char *path, long sample_rate)
 {
 	sample_rate_ = sample_rate;
 	plist = load_playlist(path,sample_rate_);
-	start_track(plist->current_track);
+	if(plist != NULL)
+	{
+		start_track(plist->current_track);
+		return true;
+	}
+	else
+		return false;
 }
 
 void close_file(void)
@@ -33,7 +39,7 @@ void close_file(void)
 void start_track(int track)
 {
 	char message[256];
-	memset(audio_buffer,0,8192);
+	memset(audio_buffer,0,8192 * sizeof(short));
 	plist->current_track = track;
 	entry = plist->entries[track];
 	if(plist->type == GME_ZIP)
@@ -49,7 +55,7 @@ void start_track(int track)
 	{
 		if(emu == NULL)
 		{
-			if(entry->track_type != NULL)
+			if(entry != NULL && entry->track_type != NULL)
 			{
 				emu = gme_new_emu(entry->track_type,sample_rate_);
 				gme_load_data(emu,plist->playlist_data,plist->playlist_data_length);
@@ -94,7 +100,7 @@ short *play(void)
 	}
 	else
 	{
-		memset(audio_buffer,0,8192);
+		memset(audio_buffer,0,8192 * sizeof(short));
 	}
 	return audio_buffer;
 }

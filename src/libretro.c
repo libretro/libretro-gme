@@ -176,8 +176,10 @@ bool retro_load_game(const struct retro_game_info *info)
    if (!info || !info->data)
       return false;
 
-   open_file(info->path,sample_rate);
-   return true;
+   if(open_file(info->path,sample_rate))
+      return true;
+   else
+      return false;
 }
 
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info)
