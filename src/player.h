@@ -7,7 +7,6 @@
 
 bool is_emu_loaded(void);
 bool open_file(const char *path, long sample_rate);
-void open_data(char *data, int length, long sample_rate);
 void close_file(void);
 void start_track(int track);
 short *play(void);

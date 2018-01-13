@@ -3,31 +3,44 @@
 
 #include "gme.h"
 
-typedef enum {GME_ZIP,GME_FILE} playlist_type;
+typedef struct {
+	char* name;
+	char* data;
+	int length;
+} file_data;
 
 typedef struct {
-	gme_type_t track_type;
-	int track_number;
-	char *track_data;
-	int track_data_length;
-	char *track_name;
-	long track_length;
-} playlist_entry;
-
-typedef struct {
-	playlist_type type;
-	char *filename;
-	char *game_name;
-	char *playlist_data;
+	char* name;
+	char* data;
+	int length;
+	gme_type_t file_type;
 	int num_tracks;
-	int current_track;
-	int playlist_data_length;
-	playlist_entry *entries[255];
+} gme_file_data;
+
+typedef struct {
+	int file_id;
+	int track_id;
+	int track_length;
+	char* game_name;
+	char* track_name;	
+} gme_track_data;
+		
+typedef struct {
+	int num_files;
+	gme_file_data** files;
+	int num_tracks;
+	gme_track_data** tracks;
 } playlist;
 
-playlist *load_playlist(const char *path,long sample_rate);
-bool load_gme_file(playlist *playlist,long sample_rate);
-bool load_zip(playlist *playlist,long sample_rate);
-void unload_playlist(playlist *playlist);
+playlist* get_playlist(const char *path);
+
+gme_file_data** get_playlist_gme_files(const char *path);
+gme_file_data* get_gme_file_data(file_data *fd);
+file_data* get_file_data(const char *path);
+file_data** get_files_from_zip(const char *path);
+
+gme_track_data* get_track_data(Music_Emu* emu, int fileid, int trackid, const char *path);
+
+void cleanup_playlist(playlist* pl);
 
 #endif

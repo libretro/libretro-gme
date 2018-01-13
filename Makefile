@@ -313,15 +313,16 @@ ifeq (,$(findstring msvc,$(platform)))
 CFLAGS   += -std=c99
 endif
 
-CFLAGS   += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
-CXXFLAGS += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
+CFLAGS   += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM) -g
+CXXFLAGS += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM) -g
+LDFLAGS  += -g
 
 ifeq (,$(findstring msvc,$(platform)))
 LDFLAGS  += -shared
 endif
 
 EXECUTABLE = $(TARGET)
-INFO = $(TARGET_NAME).info
+INFO = $(TARGET_NAME)_libretro.info
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
@@ -355,8 +356,8 @@ clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
 
 install:
-	cp $(EXECUTABLE) ~/.config/retroarch/cores
-	cp $(INFO) ~/.config/retroarch/cores
+	cp $(EXECUTABLE) /usr/local/lib/libretro
+	cp $(INFO) /usr/local/lib/libretro
 
 test:
 	retroarch --verbose -L ~/.config/retroarch/cores/$(EXECUTABLE) "./test/Final Fantasy 6 [ff6].zip"
