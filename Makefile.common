@@ -79,5 +79,4 @@ SOURCES_C    := $(CORE_DIR)/src/libretro.c \
 					 $(DEPS_DIR)/libretro-common/compat/compat_strcasestr.c \
 					 $(DEPS_DIR)/libretro-common/compat/compat_strl.c \
 					 $(DEPS_DIR)/libretro-common/file/file_path.c \
-					 $(DEPS_DIR)/libretro-common/file/retro_stat.c \
 					 $(DEPS_DIR)/libretro-common/string/stdstring.c

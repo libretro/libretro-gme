@@ -1,4 +1,4 @@
-/* Copyright  (C) 2010-2015 The RetroArch team
+/* Copyright  (C) 2010-2017 The RetroArch team
  *
  * ---------------------------------------------------------------------------------------
  * The following license statement only applies to this file (compat_strl.c).
@@ -24,8 +24,6 @@
 
 #include <compat/strl.h>
 #include <compat/posix_string.h>
-
-#include <retro_assert.h>
 
 /* Implementation of strlcpy()/strlcat() based on OpenBSD. */
 

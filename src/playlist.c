@@ -143,7 +143,7 @@ gme_file_data* get_gme_file_data(file_data *fd)
 	//deep copy file data
 	gfd->name = calloc(strlen(fd->name+1),sizeof(char));
 	strcpy(gfd->name,fd->name);
-	gfd->data = malloc(sizeof(fd->data) * sizeof(char));
+	gfd->data = malloc(fd->length * sizeof(char));
 	memcpy(gfd->data,fd->data,fd->length);
 	gfd->length = fd->length;
 	return gfd;
