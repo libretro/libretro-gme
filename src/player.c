@@ -2,6 +2,7 @@
 #include <string.h>
 #include <boolean.h>
 #include "playlist.h"
+#include "fileformat.h"
 #include "log.h"
 
 static playlist *plist = NULL;
@@ -24,8 +25,7 @@ bool open_file(const char *path, long sample_rate)
 	sample_rate_ = sample_rate;
 	current_track = 0;
 	prev_fileid = -1;
-	plist = get_playlist(path);
-	if(plist != NULL)
+	if(get_playlist(path,&plist))
 	{
 		start_track(current_track);
 		return true;

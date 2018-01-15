@@ -2,12 +2,7 @@
 #define GME_LIBRETRO_PLAYLIST_H__
 
 #include "gme.h"
-
-typedef struct {
-	char* name;
-	char* data;
-	int length;
-} file_data;
+#include "fileformat.h"
 
 typedef struct {
 	char* name;
@@ -32,15 +27,12 @@ typedef struct {
 	gme_track_data** tracks;
 } playlist;
 
-playlist* get_playlist(const char *path);
+bool get_playlist(const char *path,playlist **pl);
 
-gme_file_data** get_playlist_gme_files(const char *path);
-gme_file_data* get_gme_file_data(file_data *fd);
-file_data* get_file_data(const char *path);
-file_data** get_files_from_zip(const char *path);
+bool get_playlist_gme_files(const char *path,gme_file_data*** gme_files,int *num_file, int *num_tracks);
+bool get_gme_file_data(file_data *fd,gme_file_data **gfd);
+bool get_track_data(Music_Emu* emu, int fileid, int trackid, const char *path,gme_track_data **gtd);
 
-gme_track_data* get_track_data(Music_Emu* emu, int fileid, int trackid, const char *path);
-
-void cleanup_playlist(playlist* pl);
+bool cleanup_playlist(playlist* pl);
 
 #endif

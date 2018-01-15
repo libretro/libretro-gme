@@ -313,8 +313,9 @@ ifeq (,$(findstring msvc,$(platform)))
 CFLAGS   += -std=c99
 endif
 
-CFLAGS   += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
-CXXFLAGS += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
+CFLAGS   += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM) -g
+CXXFLAGS += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM) -g
+LDFLAGS  += -g
 
 ifeq (,$(findstring msvc,$(platform)))
 LDFLAGS  += -shared

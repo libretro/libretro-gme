@@ -61,6 +61,7 @@ SOURCES_C    := $(CORE_DIR)/src/libretro.c \
 					 $(CORE_DIR)/src/player.c \
 					 $(CORE_DIR)/src/playlist.c \
 					 $(CORE_DIR)/src/log.c \
+					 $(CORE_DIR)/src/fileformat.c \
 					 $(DEPS_DIR)/zlib-1.2.8/adler32.c \
 					 $(DEPS_DIR)/zlib-1.2.8/crc32.c \
 					 $(DEPS_DIR)/zlib-1.2.8/inflate.c \
