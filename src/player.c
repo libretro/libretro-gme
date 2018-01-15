@@ -52,6 +52,7 @@ void start_track(int tracknr)
 		//change emu if file changes
 		if(track->file_id != prev_fileid)
 		{
+			is_playing_ = false;
 			file = plist->files[track->file_id];
 			prev_fileid = track->file_id;
 			if(emu !=NULL)
@@ -68,7 +69,7 @@ void start_track(int tracknr)
 		is_playing_ = false;				
 	}
 	if(is_playing_)
-		gme_start_track(emu, tracknr);
+		gme_start_track(emu, track->track_id);
 }
 
 short *play(void)
@@ -122,7 +123,7 @@ char *get_game_name(char *buf)
 
 char *get_track_count(char *buf)
 {
-	sprintf(buf, "%d/%d",current_track,plist->num_tracks);
+	sprintf(buf, "%d/%d",current_track+1,plist->num_tracks);
 	return buf;
 }
 

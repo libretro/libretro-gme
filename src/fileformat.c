@@ -9,17 +9,20 @@
 #include "unzip.h"
 #include "log.h"
 
-static bool get_files_from_zip(const char *path, file_data** *files)
+static bool get_files_from_zip(const char *path, file_data ***dest_files, int *dest_numfiles)
 {
     unzFile uf = NULL;
     unz_global_info64 gi;
     unz_file_info64 file_info;
     int i;
     char filename_inzip[256];
+    file_data **files;
+    int numfiles;
     //load zip content
     uf = unzOpen64(path);
     unzGetGlobalInfo64(uf,&gi);
-    *files = malloc(sizeof(file_data*) * gi.number_entry);
+    numfiles = (int)gi.number_entry;
+    files = malloc(sizeof(file_data*) * numfiles);
 
     for(i=0;i<gi.number_entry;i++)
     {
@@ -27,7 +30,7 @@ static bool get_files_from_zip(const char *path, file_data** *files)
         int err;
         int bytes_read;
         uInt size_buf = 8192;
-        (*files)[i] = malloc(sizeof(file_data));
+        files[i] = malloc(sizeof(file_data));
         //read compressed file info
         err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
         if(err!=UNZ_OK)
@@ -35,11 +38,11 @@ static bool get_files_from_zip(const char *path, file_data** *files)
             return false;
         }
         //get file name in zip
-        (*files)[i]->name = calloc(strlen(filename_inzip)+1,sizeof(char));
-        strcpy((*files)[i]->name,filename_inzip);
+        files[i]->name = calloc(strlen(filename_inzip)+1,sizeof(char));
+        strcpy(files[i]->name,filename_inzip);
         //allocate uncompressed data buffer
-        (*files)[i]->length= sizeof(char) * file_info.uncompressed_size;
-        (*files)[i]->data = (char*)malloc((*files)[i]->length);
+        files[i]->length= sizeof(char) * file_info.uncompressed_size;
+        files[i]->data = (char*)malloc(files[i]->length);
         //setup buffer
         bytes_read = 0;
         buf = (void*)malloc(size_buf);
@@ -57,13 +60,17 @@ static bool get_files_from_zip(const char *path, file_data** *files)
                 return false;
             if(err>0)
             {
-                memcpy((*files)[i]->data + bytes_read,buf,err * sizeof(char));
+                memcpy(files[i]->data + bytes_read,buf,err * sizeof(char));
                 bytes_read += err;
             }
         } while (err>0);
         if(buf!=NULL)
             free(buf);
+        if ((i+1)<gi.number_entry)
+            unzGoToNextFile(uf);
     }
+    *dest_files = files;
+    *dest_numfiles = numfiles;
     return true;
 }
 
@@ -79,25 +86,26 @@ static bool get_gz_data(const char *path,int length, char **data)
     return true;
 }
 
-bool get_file_data(const char *path,file_data ***files)
+bool get_file_data(const char *path,file_data ***dest_files, int *dest_numfiles)
 {
     //local variables
     FILE *fp;
     const char *bname;
     char *ext;
     unsigned long uncomp_length;
+    file_data **files;
     //get file name and extension
     bname = path_basename(path);
     ext = strrchr(path,'.') +1;
     //get file data
     if(strcmp(ext,"zip")==0)
     {
-        return get_files_from_zip(path,files);
+        return get_files_from_zip(path,dest_files,dest_numfiles);
     }
     else
     {
         file_data *fd;
-        *files = malloc(sizeof(file_data*));
+        files = malloc(sizeof(file_data*));
         fd = malloc(sizeof(file_data));
         fp = fopen(path,"rb");
         //get file length
@@ -119,7 +127,9 @@ bool get_file_data(const char *path,file_data ***files)
             if(!get_gz_data(path,fd->length,&(fd->data)))
                 return false;
         }
-        (*files)[0] = fd;
+        files[0] = fd;
+        *dest_files = files;
+        *dest_numfiles = 1;
         return true;
     }
 }
