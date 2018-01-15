@@ -97,7 +97,7 @@ bool get_gme_file_data(file_data *fd,gme_file_data **dest_gfd)
 	gme_file_data *gfd;
 	gfd = malloc(sizeof(gme_file_data));
 	//set playlist type
-	ext = strrchr(fd->name,'.') +1;
+	ext = strlwr(strrchr(fd->name,'.') +1);
 	//check extension to determine player type
 	if(strcmp(ext,"ay")==0)
 		gfd->file_type = gme_ay_type;
@@ -134,7 +134,7 @@ bool get_gme_file_data(file_data *fd,gme_file_data **dest_gfd)
 	}
 	gme_delete( temp_emu );
 	//deep copy file data
-	gfd->name = calloc(strlen(fd->name+1),sizeof(char));
+	gfd->name = calloc(strlen(fd->name)+1,sizeof(char));
 	strcpy(gfd->name,fd->name);
 	gfd->data = malloc(fd->length * sizeof(char));
 	memcpy(gfd->data,fd->data,fd->length);
