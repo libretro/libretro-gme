@@ -1,4 +1,4 @@
-    #include <stdio.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <boolean.h>
 #include <string.h>
@@ -10,17 +10,17 @@
 #include "log.h"
 
 static const char *gme_allowed_exts[] = {
-    "ay",
-    "gbs",
-    "gym",
-    "hes",
-    "kss",
-    "nsf",
-    "nsfe",
-    "sap",
-    "spc",
-    "vgm",
-    "vgz"
+    "ay","AY",
+    "gbs","GBS",
+    "gym","GYM",
+    "hes","HES",
+    "kss","KSS",
+    "nsf","NSF",
+    "nsfe","NSFE",
+    "sap","SAP",
+    "spc","SPC",
+    "vgm","VGM",
+    "vgz","VGZ"
 };
 
 static bool is_gme_allowed_ext(char *ext)
@@ -30,8 +30,10 @@ static bool is_gme_allowed_ext(char *ext)
     arr_length = sizeof(gme_allowed_exts) / sizeof(char*);
     for(i=0;i<arr_length;i++)
     {
-        if(strcmp(strlwr(ext),gme_allowed_exts[i])==0)
+        if(strcmp(ext,gme_allowed_exts[i])==0)
+        {
             return true;
+        }
     }
     return false;
 }
@@ -109,7 +111,7 @@ static bool get_files_from_zip(const char *path, file_data ***dest_files, int *d
             return false;
         }
         if(filename_inzip[file_info.size_filename -1]=='/')
-            ext = "/";
+            ext = strrchr(filename_inzip,'/');
         else
             ext = strrchr(filename_inzip,'.') + 1;
         if(is_gme_allowed_ext(ext))
@@ -162,8 +164,6 @@ static bool get_files_from_zip(const char *path, file_data ***dest_files, int *d
     *dest_numfiles = numfiles;
     return true;
 }
-
-
 
 bool get_file_data(const char *path,file_data ***dest_files, int *dest_numfiles)
 {

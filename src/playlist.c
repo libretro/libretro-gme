@@ -97,29 +97,29 @@ bool get_gme_file_data(file_data *fd,gme_file_data **dest_gfd)
 	gme_file_data *gfd;
 	gfd = malloc(sizeof(gme_file_data));
 	//set playlist type
-	ext = strlwr(strrchr(fd->name,'.') +1);
+	ext = strrchr(fd->name,'.') +1;
 	//check extension to determine player type
-	if(strcmp(ext,"ay")==0)
+	if(strcmp(ext,"ay")==0 || strcmp(ext,"AY")==0)
 		gfd->file_type = gme_ay_type;
-	else if(strcmp(ext,"gbs")==0)
+	else if(strcmp(ext,"gbs")==0 || strcmp(ext,"GBS")==0)
 		gfd->file_type = gme_gbs_type;
-	else if(strcmp(ext,"gym")==0)
+	else if(strcmp(ext,"gym")==0 || strcmp(ext,"GYM")==0)
 		gfd->file_type = gme_gym_type;
-	else if(strcmp(ext,"hes")==0)
+	else if(strcmp(ext,"hes")==0 || strcmp(ext,"HES")==0)
 		gfd->file_type = gme_hes_type;
-	else if(strcmp(ext,"kss")==0)
+	else if(strcmp(ext,"kss")==0 || strcmp(ext,"KSS")==0)
 		gfd->file_type = gme_kss_type;
-	else if(strcmp(ext,"nsf")==0)
+	else if(strcmp(ext,"nsf")==0 || strcmp(ext,"NSF")==0)
 		gfd->file_type = gme_nsf_type;
-	else if(strcmp(ext,"nsfe")==0)
+	else if(strcmp(ext,"nsfe")==0 || strcmp(ext,"NSFE")==0)
 		gfd->file_type = gme_nsfe_type;
-	else if(strcmp(ext,"sap")==0)
+	else if(strcmp(ext,"sap")==0 || strcmp(ext,"SAP")==0)
 		gfd->file_type = gme_sap_type;
-	else if(strcmp(ext,"spc") == 0)
+	else if(strcmp(ext,"spc") == 0 || strcmp(ext,"SPC")==0)
 		gfd->file_type = gme_spc_type;
-	else if(strcmp(ext,"vgm") == 0)
+	else if(strcmp(ext,"vgm") == 0 || strcmp(ext,"VGM")==0)
 		gfd->file_type = gme_vgm_type;
-	else if(strcmp(ext,"vgz") == 0)
+	else if(strcmp(ext,"vgz") == 0 || strcmp(ext,"VGZ")==0)
 		gfd->file_type = gme_vgz_type;
 	else
 		return false;
