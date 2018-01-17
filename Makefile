@@ -26,9 +26,6 @@ endif
 
 #set extension and lib path
 
-CC = gcc
-CXX = g++
-
 TARGET_NAME := gme
 
 # Unix
