@@ -41,8 +41,11 @@ static bool is_gme_allowed_ext(char *ext)
 static bool uncompress_file_data(file_data** fd)
 {
     int srcLen,dstLen;
-    file_data* src_fd = *fd;
-    file_data* dest_fd;
+    int err            = -1;
+    z_stream strm      = {0};
+    file_data* src_fd  = *fd;
+    file_data* dest_fd = NULL;
+
     srcLen = src_fd->length;
     memcpy(&dstLen,&(src_fd->data[src_fd->length-4]),4);
     dest_fd = malloc(sizeof(file_data));
@@ -50,7 +53,6 @@ static bool uncompress_file_data(file_data** fd)
     dest_fd->name = calloc(strlen(src_fd->name)+1,sizeof(char));
     strcpy(dest_fd->name,src_fd->name);
     dest_fd->data = malloc(dstLen * sizeof(char));
-    z_stream strm  = {0};
     strm.total_in  = strm.avail_in  = srcLen;
     strm.total_out = strm.avail_out = dstLen;
     strm.next_in   = (Bytef *) src_fd->data;
@@ -60,17 +62,19 @@ static bool uncompress_file_data(file_data** fd)
     strm.zfree  = Z_NULL;
     strm.opaque = Z_NULL;
 
-    int err = -1;
 
     err = inflateInit2(&strm, (15 + 32)); //15 window bits, and the +32 tells zlib to to detect if using gzip or zlib
-    if (err == Z_OK) {
+    if (err == Z_OK)
+    {
         err = inflate(&strm, Z_FINISH);
-        if (err != Z_STREAM_END) {
+        if (err != Z_STREAM_END)
+	{
              inflateEnd(&strm);
              return false;
         }
     }
-    else {
+    else
+    {
         inflateEnd(&strm);
         return false;
     }
@@ -92,6 +96,7 @@ static bool get_files_from_zip(const char *path, file_data ***dest_files, int *d
     char *ext;
     file_data **files;
     int numfiles,position;
+
     //load zip content
     uf = unzOpen64(path);
     unzGetGlobalInfo64(uf,&gi);

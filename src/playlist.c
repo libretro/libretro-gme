@@ -54,13 +54,13 @@ bool get_playlist(const char *path, playlist **dest_pl)
 
 bool get_playlist_gme_files(const char *path,gme_file_data ***dest_files,int *dest_num_files, int *dest_num_tracks)
 {
-	bool success;
 	int i;
-	success = true;
-	file_data **files = NULL;
+	bool success              = true;
+	file_data **files         = NULL;
 	gme_file_data **gme_files = NULL;
-	int num_files = 0;
-	int num_tracks = 0;
+	int num_files             = 0;
+	int num_tracks            = 0;
+
 	if(get_file_data(path,&files,&num_files)) {
 		gme_files = malloc(sizeof(gme_file_data*) * num_files);
 		for(i=0;i< num_files;i++)
