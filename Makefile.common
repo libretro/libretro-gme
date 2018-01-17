@@ -76,6 +76,7 @@ SOURCES_C    := $(CORE_DIR)/src/libretro.c \
 					 $(DEPS_DIR)/zlib-1.2.8/gzread.c \
 					 $(DEPS_DIR)/zlib-1.2.8/gzwrite.c \
 					 $(DEPS_DIR)/zlib-1.2.8/trees.c \
+					 $(DEPS_DIR)/libretro-common/compat/compat_snprintf.c \
 					 $(DEPS_DIR)/libretro-common/compat/compat_posix_string.c \
 					 $(DEPS_DIR)/libretro-common/compat/compat_strcasestr.c \
 					 $(DEPS_DIR)/libretro-common/compat/compat_strl.c \
