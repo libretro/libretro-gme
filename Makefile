@@ -206,6 +206,7 @@ else ifeq ($(platform), emscripten)
 	STATIC_LINKING = 1
 	CC  = emcc
 	CXX = em++
+	INCFLAGS_PLATFORM += -D_XOPEN_SOURCE
 # Windows MSVC 2010 x64
 else ifeq ($(platform), windows_msvc2010_x64)
 	CC  = cl.exe
@@ -324,7 +325,7 @@ INFO = $(TARGET_NAME)_libretro.info
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
-OBJOUT   = -o
+OBJOUT   = -o 
 LINKOUT  = -o 
 
 ifneq (,$(findstring msvc,$(platform)))
