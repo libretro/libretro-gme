@@ -15,6 +15,19 @@ typedef struct {
   char  		*pixel_data;
 } surface;
 
+#define gme_black   0x0000
+#define gme_white   0xFFFF
+#define gme_gray    0x7BEF
+#define gme_red     0xF800
+#define gme_orange  0xFBE0
+#define gme_yellow  0xFFE0
+#define gme_green   0x07E0
+#define gme_blue    0x001F
+#define gme_indigo  0x4810
+#define gme_violet  0x901A
+
+extern const short gme_rainbow7[7];
+
 unsigned short get_color(char r, char g, char b);
 surface *create_surface(unsigned int width, unsigned int height, unsigned int bpp);
 void free_surface(surface *surf);

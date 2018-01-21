@@ -4,6 +4,8 @@
 
 #include <retro_miscellaneous.h>
 
+const short gme_rainbow7[7] = {gme_red,gme_orange,gme_yellow,gme_green,gme_blue,gme_indigo,gme_violet};
+
 unsigned short get_color(char r, char g, char b)
 {
 	unsigned short color= (r << 11) | (g << 5) | b;

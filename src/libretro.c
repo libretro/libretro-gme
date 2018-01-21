@@ -47,33 +47,45 @@ size_t retro_get_memory_size(unsigned id){ return 0; }
 void retro_cheat_reset(void) {}
 void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
-static int draw_text_centered(char* text,char r, char g, char b, int y, int maxlen)
+static int draw_text_centered(char* text,unsigned short color, int y, int maxlen)
 {
    int msglen = get_string_length(text);
-   draw_string(framebuffer,get_color(r,g,b),text,MAX(160-(msglen/2),21), y,get_track_elapsed_frames());
+   draw_string(framebuffer,color,text,MAX(160-(msglen/2),21), y,get_track_elapsed_frames());
    return MAX(msglen,maxlen);
 }
 
 // Custom functions
 static void draw_ui(void)
 {
+   int offset;
    int maxlen    = 0;
+   char colorstart = 0;
+   unsigned short linecolor = 0;
    char *message = malloc(100);
-
    //lines
-   draw_box(framebuffer,get_color(31,63,31),5,5,315,235);
-   draw_line(framebuffer,get_color(15,31,15),5,5,20,20);
-   draw_line(framebuffer,get_color(15,31,15),315,5,300,20);
-   draw_line(framebuffer,get_color(15,31,15),5,235,20,220);
-   draw_line(framebuffer,get_color(15,31,15),315,235,300,220);
-   draw_box(framebuffer,get_color(15,31,15),20,20,300,220);
+   draw_box(framebuffer,gme_white,5,5,315,235);
+   draw_line(framebuffer,gme_gray,5,5,20,20);
+   draw_line(framebuffer,gme_gray,315,5,300,20);
+   draw_line(framebuffer,gme_gray,5,235,20,220);
+   draw_line(framebuffer,gme_gray,315,235,300,220);
+   draw_box(framebuffer,gme_gray,20,20,300,220);
+   colorstart = (get_track_elapsed_frames() % 30) >> 2;
+   for(offset=1;offset<15;offset++)
+   {
+
+         linecolor = gme_rainbow7[(colorstart + (offset >> 1)) % 7];
+         draw_line(framebuffer,linecolor,5+offset,6+offset,5+offset,234-offset); //left
+         draw_line(framebuffer,linecolor,6+offset,5+offset,314-offset,5+offset); //top
+         draw_line(framebuffer,linecolor,315-offset,6+offset,315-offset,234-offset); //right
+         draw_line(framebuffer,linecolor,6+offset,235-offset,314-offset,235-offset); //top
+   }
    //text
-   maxlen = draw_text_centered(get_game_name(message),31,0,0,100,maxlen);
-   maxlen = draw_text_centered(get_track_count(message),0,63,0,110,maxlen);
-   maxlen = draw_text_centered(get_song_name(message),0,0,31,120,maxlen);
-   maxlen = draw_text_centered(get_track_position(message),31,63,31,130,maxlen);
+   maxlen = draw_text_centered(get_game_name(message),gme_red,100,maxlen);
+   maxlen = draw_text_centered(get_track_count(message),gme_yellow,110,maxlen);
+   maxlen = draw_text_centered(get_song_name(message),gme_blue,120,maxlen);
+   maxlen = draw_text_centered(get_track_position(message),gme_white,130,maxlen);
    maxlen = MIN(maxlen,280);
-   draw_box(framebuffer,get_color(15,0,15),160-(maxlen/2),98,160+(maxlen/2),140);
+   draw_box(framebuffer,gme_violet,160-(maxlen/2),98,160+(maxlen/2),140);
    free(message);
 }
 
