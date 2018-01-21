@@ -13,7 +13,9 @@
 // Static globals
 static surface *framebuffer = NULL;;
 static uint16_t previnput = 0;
-
+static float last_aspect = 0.0f;
+static float last_scale = 0.0f;
+static bool display_rainbow;
 // Callbacks
 
 static retro_video_refresh_t video_cb;
@@ -26,7 +28,6 @@ static retro_audio_sample_batch_t audio_batch_cb;
 void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
 void retro_set_input_poll(retro_input_poll_t cb) { input_poll_cb = cb; }
 void retro_set_input_state(retro_input_state_t cb) { input_state_cb = cb; }
-void retro_set_environment(retro_environment_t cb) { environ_cb = cb; }
 void retro_set_audio_sample(retro_audio_sample_t cb) { audio_cb = cb; }
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_cb = cb; }
 
@@ -49,8 +50,9 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
 static int draw_text_centered(char* text,unsigned short color, int y, int maxlen)
 {
+   int centerx = framebuffer->width/2;
    int msglen = get_string_length(text);
-   draw_string(framebuffer,color,text,MAX(160-(msglen/2),21), y,get_track_elapsed_frames());
+   draw_string(framebuffer,color,text,MAX(centerx-(msglen/2),21), y,get_track_elapsed_frames());
    return MAX(msglen,maxlen);
 }
 
@@ -59,33 +61,41 @@ static void draw_ui(void)
 {
    int offset;
    int maxlen    = 0;
+   int centerx = framebuffer->width/2;
+   int centery = framebuffer->height/2;
+   box ob = {5,5,framebuffer->width-5,framebuffer->height-5};
+   box ib = {20,20,framebuffer->width-20,framebuffer->height-20};
    char colorstart = 0;
-   unsigned short linecolor = 0;
+   unsigned short lc = 0;
    char *message = malloc(100);
    //lines
-   draw_box(framebuffer,gme_white,5,5,315,235);
-   draw_line(framebuffer,gme_gray,5,5,20,20);
-   draw_line(framebuffer,gme_gray,315,5,300,20);
-   draw_line(framebuffer,gme_gray,5,235,20,220);
-   draw_line(framebuffer,gme_gray,315,235,300,220);
-   draw_box(framebuffer,gme_gray,20,20,300,220);
-   colorstart = (get_track_elapsed_frames() % 30) >> 2;
-   for(offset=1;offset<15;offset++)
+   draw_box(framebuffer,gme_white,ob);
+   draw_line(framebuffer,gme_gray,ob.x0,ob.y0,ib.x0,ib.y0); //top-left corner
+   draw_line(framebuffer,gme_gray,ob.x1,ob.y0,ib.x1,ib.y0); //top-right corner
+   draw_line(framebuffer,gme_gray,ob.x0,ob.y1,ib.x0,ib.y1); //bottom-left corner
+   draw_line(framebuffer,gme_gray,ob.x1,ob.y1,ib.x1,ib.y1);
+   draw_box(framebuffer,gme_gray,ib);
+   //display rainbow if variable is set
+   if(display_rainbow)
    {
-
-         linecolor = gme_rainbow7[(colorstart + (offset >> 1)) % 7];
-         draw_line(framebuffer,linecolor,5+offset,6+offset,5+offset,234-offset); //left
-         draw_line(framebuffer,linecolor,6+offset,5+offset,314-offset,5+offset); //top
-         draw_line(framebuffer,linecolor,315-offset,6+offset,315-offset,234-offset); //right
-         draw_line(framebuffer,linecolor,6+offset,235-offset,314-offset,235-offset); //top
+      colorstart = (get_track_elapsed_frames() % 30) >> 2;
+      for(offset=1;offset<15;offset++)
+      {
+            lc = gme_rainbow7[(colorstart + (offset >> 1)) % 7];
+            draw_line(framebuffer,lc,ob.x0+offset,ob.y0+1+offset,ob.x0+offset,ob.y1-1-offset); //left
+            draw_line(framebuffer,lc,ob.x0+1+offset,ob.y0+offset,ob.x1-1-offset,ob.y0+offset); //top
+            draw_line(framebuffer,lc,ob.x1-offset,ob.y0+1+offset,ob.x1-offset,ob.y1-1-offset); //right
+            draw_line(framebuffer,lc,ob.x0+1+offset,ob.y1-offset,ob.x1-1-offset,ob.y1-offset); //top
+      }
    }
    //text
-   maxlen = draw_text_centered(get_game_name(message),gme_red,100,maxlen);
-   maxlen = draw_text_centered(get_track_count(message),gme_yellow,110,maxlen);
-   maxlen = draw_text_centered(get_song_name(message),gme_blue,120,maxlen);
-   maxlen = draw_text_centered(get_track_position(message),gme_white,130,maxlen);
-   maxlen = MIN(maxlen,280);
-   draw_box(framebuffer,gme_violet,160-(maxlen/2),98,160+(maxlen/2),140);
+   maxlen = draw_text_centered(get_game_name(message),gme_red,centery-20,maxlen);
+   maxlen = draw_text_centered(get_track_count(message),gme_yellow,centery-10,maxlen);
+   maxlen = draw_text_centered(get_song_name(message),gme_blue,centery,maxlen);
+   maxlen = draw_text_centered(get_track_position(message),gme_white,centery+10,maxlen);
+   maxlen = MIN(maxlen,framebuffer->width-40);
+   box tb = {centerx-(maxlen/2),centery-22,centerx+(maxlen/2),centery+22};
+   draw_box(framebuffer,gme_violet,tb);
    free(message);
 }
 
@@ -105,22 +115,76 @@ void retro_get_system_info(struct retro_system_info *info)
    info->block_extract = true;
 }
 
+void retro_set_environment(retro_environment_t cb) 
+{ 
+   environ_cb = cb;
+   static const struct retro_variable vars[] = {
+      { "gme_aspect", "Aspect Ratio; 16:9|4:3"},
+      { "gme_scale", "Scale; 1x|2x"},
+      { "display_rainbow", "Display Rainbow Animation; false|true"},
+      { NULL, NULL},
+   };
+   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
+}
+
 /*
  * Tell libretro about the AV system; the fps, sound sample rate and the
  * resolution of the display.
  */
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
+   float aspect = 4.0f / 3.0f;
+   int scale = 2;
+   int width = 640;
+   int height = 480;
+   struct retro_variable var = {0};
+   if(framebuffer)
+      free_surface(framebuffer);
+   var.key = "gme_scale";
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (!strcmp(var.value, "1x"))
+         scale = 1;
+      else if (!strcmp(var.value, "2x"))
+         scale = 2;
+   }
+   var.key = "gme_aspect";
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if (!strcmp(var.value, "4:3"))
+      {
+         aspect = 4.0f / 3.0f;
+         width = 320 * scale;
+         height = 240 * scale;
+      }
+      else if (!strcmp(var.value, "16:9"))
+      {
+         aspect = 16.0f / 9.0f;
+         width = 320 * scale;
+         height = 180 * scale;
+      }
+   }
+   var.key = "display_rainbow";
+   if(environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   {
+      if(!strcmp(var.value,"true"))
+         display_rainbow = true;
+      else
+         display_rainbow = false;
+   }
    int pixel_format = RETRO_PIXEL_FORMAT_RGB565;
    memset(info, 0, sizeof(*info));
    info->timing.fps            = 60.0f;
    info->timing.sample_rate    = 44100;
-   info->geometry.base_width   = 320;
-   info->geometry.base_height  = 240;
-   info->geometry.max_width    = 320;
-   info->geometry.max_height   = 240;
-   info->geometry.aspect_ratio = 320.0f / 240.0f;
+   info->geometry.base_width   = width;
+   info->geometry.base_height  = height;
+   info->geometry.max_width    = 640;
+   info->geometry.max_height   = 480;
+   info->geometry.aspect_ratio = aspect;
    environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixel_format);
+   framebuffer = create_surface(width,height,2);
+   last_aspect = aspect;
+   last_scale = scale;
 }
 
 void retro_init(void)
@@ -130,7 +194,6 @@ void retro_init(void)
    init_log(environ_cb);
    // the performance level is guide to frontend to give an idea of how intensive this core is to run
    environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
-   framebuffer = create_surface(320,240,2);
 }
 
 // End of retrolib
@@ -151,7 +214,8 @@ void retro_run(void)
    uint16_t input = 0;
    uint16_t realinput = 0;
    int i;
-
+   bool updated = false;
+   char str[256];
    // input handling
    input_poll_cb();
    for(i=0;i<16;i++)
@@ -177,6 +241,20 @@ void retro_run(void)
    video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
    //audio handling
    audio_batch_cb(play(),1470);
+   if(environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE,&updated) && updated)
+   {
+      float aspect = last_aspect;
+      int scale = last_scale;
+      struct retro_system_av_info info;
+      retro_get_system_av_info(&info);
+      if((aspect != last_aspect && aspect != 0.0f) || (scale != last_scale && scale != 0.0f))
+      {
+         bool ret;
+         ret = environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info.geometry);
+         sprintf(str,"SET_SYSTEM_AV_INFO/SET_GEOMETRY = %u.\n", ret);
+         handle_info(str);
+      }
+   }
 }
 
 // File Loading

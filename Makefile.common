@@ -6,7 +6,8 @@ INCFLAGS 			= -I$(CORE_DIR) \
 		     			  -I$(LIBRETRO_COMM_DIR)/include \
 						  -I$(DEPS_DIR)/game-music-emu/gme \
 						  -I$(DEPS_DIR)/zlib-1.2.8 \
-						  -I$(DEPS_DIR)/zlib-1.2.8/contrib/minizip
+						  -I$(DEPS_DIR)/zlib-1.2.8/contrib/minizip \
+						  -I$(DEPS_DIR)/font8x8
 
 SOURCES_CXX := \
 					$(GME_DIR)/gme/Ay_Apu.cpp \
