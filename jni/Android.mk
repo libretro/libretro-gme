@@ -23,7 +23,7 @@ CORE_DIR := ..
 include $(CORE_DIR)/Makefile.common
 
 LOCAL_SRC_FILES    += $(SOURCES_C) $(SOURCES_CXX)
-LOCAL_CFLAGS 		 += -O3 -std=gnu99 -ffast-math -funroll-loops -DBLARGG_LITTLE_ENDIAN -DIOAPI_NO_64
+LOCAL_CFLAGS 		 := -ffast-math -funroll-loops -DBLARGG_LITTLE_ENDIAN -DIOAPI_NO_64
 LOCAL_C_INCLUDES   = $(CORE_DIR)/deps/libretro-common/include \
 							$(CORE_DIR)/deps/game-music-emu/gme \
 							$(CORE_DIR)/deps/zlib-1.2.8 \
