@@ -131,7 +131,8 @@ else ifeq ($(platform), ps3)
 	CC = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
 	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
 	AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
-	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__
+	CFLAGS += -DIOAPI_NO_64
+	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__ -DIOAPI_NO_64
 	STATIC_LINKING = 1
 
 # sncps3
@@ -140,7 +141,8 @@ else ifeq ($(platform), sncps3)
 	CC = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
 	CXX = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
 	AR = $(CELL_SDK)/host-win32/sn/bin/ps3snarl.exe
-	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__
+	CFLAGS += -DIOAPI_NO_64
+	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__ -DIOAPI_NO_64
 	STATIC_LINKING = 1
 
 # Lightweight PS3 Homebrew SDK
