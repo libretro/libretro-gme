@@ -8,7 +8,7 @@ INCFLAGS 			= -I$(CORE_DIR) \
 						  -I$(DEPS_DIR)/zlib-1.2.8 \
 						  -I$(DEPS_DIR)/zlib-1.2.8/contrib/minizip
 
-ifneq (,$(findstring msvc2003,$(platform)))
+ifneq (,$(findstring msvc200,$(platform)))
 INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
 endif
 
