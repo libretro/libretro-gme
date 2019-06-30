@@ -81,7 +81,8 @@ else ifneq (,$(findstring ios,$(platform)))
 	else
 		CC = clang -arch armv7 -isysroot $(IOSSDK)
 		CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
-	endif	  
+	endif
+	CFLAGS += -DIOS
 	CXXFLAGS += -DIOS
 	CXXFLAGS += -DARM
 ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
