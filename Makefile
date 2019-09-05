@@ -164,14 +164,15 @@ else ifeq ($(platform), xenon)
 	CXXFLAGS += -D__LIBXENON__ -m32 -D__ppc__
 	STATIC_LINKING = 1
 
-# Nintendo Wii
-else ifeq ($(platform), wii)
-	TARGET := $(TARGET_NAME)_libretro_$(platform).a
-	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
-	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
-	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	CXXFLAGS += -DGEKKO -mrvl -mcpu=750 -meabi -mhard-float -DBLARGG_BIG_ENDIAN=1 -D__ppc__
-	STATIC_LINKING = 1
+# CTR(3DS)
+else ifeq ($(platform), ctr)
+   TARGET := $(TARGET_NAME)_libretro_$(platform).a
+   CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
+   CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
+   AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
+   CXXFLAGS += -DARM11 -D_3DS
+   CXXFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
+   STATIC_LINKING = 1
 
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
@@ -187,14 +188,21 @@ else ifeq ($(platform), libnx)
     CFLAGS += -std=gnu11
     STATIC_LINKING = 1
 
-# Nintendo WiiU
-else ifeq ($(platform), wiiu)
+# Nintendo Game Cube / Wii / WiiU
+else ifneq (,$(filter $(platform), ngc wii wiiu))
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	CXXFLAGS += -DGEKKO -DWIIU -mrvl -mcpu=750 -meabi -mhard-float -DBLARGG_BIG_ENDIAN=1 -D__ppc__
+	CXXFLAGS += -DGEKKO -mcpu=750 -meabi -mhard-float -DBLARGG_BIG_ENDIAN=1 -D__ppc__
 	STATIC_LINKING = 1
+	ifneq (,$(findstring wiiu,$(platform)))
+		CXXFLAGS += -DWIIU -DHW_RVL
+	else ifneq (,$(findstring wii,$(platform)))
+		CXXFLAGS += -DHW_RVL -mrvl
+	else ifneq (,$(findstring ngc,$(platform)))
+		CXXFLAGS += -DHW_DOL -mrvl
+	endif
 
 # Nintendo Switch (libtransistor)
 else ifeq ($(platform), switch)
@@ -437,8 +445,8 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 # Windows
 else
 	TARGET := $(TARGET_NAME)_libretro.dll
-	CC = gcc
-	CXX = g++
+	CC ?= gcc
+	CXX ?= g++
 	SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=link.T
 	CXXFLAGS += -D__WIN32__ -D__WIN32_LIBRETRO__
 
