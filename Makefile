@@ -253,6 +253,7 @@ else ifeq ($(platform), emscripten)
 	STATIC_LINKING = 1
 	CC  = emcc
 	CXX = em++
+	AR  = emar
 	INCFLAGS_PLATFORM += -D_XOPEN_SOURCE
 # Windows MSVC 2010 x64
 else ifeq ($(platform), windows_msvc2010_x64)
