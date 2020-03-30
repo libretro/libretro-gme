@@ -165,7 +165,8 @@ else ifeq ($(platform), psl1ght)
 	CC = $(PS3DEV)/ppu/bin/ppu-gcc$(EXE_EXT)
 	CXX = $(PS3DEV)/ppu/bin/ppu-g++$(EXE_EXT)
 	AR = $(PS3DEV)/ppu/bin/ppu-ar$(EXE_EXT)
-	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__
+	CFLAGS += -DIOAPI_NO_64
+	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__ -DIOAPI_NO_64
 	STATIC_LINKING = 1
 
 # Xbox 360
