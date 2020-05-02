@@ -124,8 +124,8 @@ else ifeq ($(platform), qnx)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).so
 	fpic := -fPIC
 	SHARED := -shared -Wl,--version-script=link.T
-	CC = qcc -Vgcc_notarmv7le
-	CXX = QCC -Vgcc_notarmv7le
+	CC = qcc -Vgcc_ntoarmv7le
+	CXX = QCC -Vgcc_ntoarmv7le
 	AR = QCC -Vgcc_ntoarmv7le
 	CXXFLAGS += -D__BLACKBERRY_QNX__
 	CXXFLAGS += -DARM
