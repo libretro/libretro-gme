@@ -132,12 +132,14 @@ else ifeq ($(platform), qnx)
 
 # Vita
 else ifeq ($(platform), vita)
-	TARGET := $(TARGET_NAME)_libretro_$(platform).so
-	fpic := -fPIC
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	fpic :=
 	CC = arm-vita-eabi-gcc$(EXE_EXT)
 	CXX = arm-vita-eabi-g++$(EXE_EXT)
 	AR = arm-vita-eabi-ar$(EXE_EXT)
-	CXXFLAGS += -DVITA
+	CFLAGS += -DIOAPI_NO_64 -fno-common
+	CXXFLAGS += -DVITA -DIOAPI_NO_64 -fno-common
+	STATIC_LINKING = 1
 
 # PS3
 else ifeq ($(platform), ps3)
