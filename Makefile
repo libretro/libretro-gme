@@ -113,7 +113,16 @@ else ifeq ($(platform), qnx)
 	AR = QCC -Vgcc_ntoarmv7le
 	CXXFLAGS += -D__BLACKBERRY_QNX__
 	CXXFLAGS += -DARM
-
+else ifeq ($(platform), psp1)
+   TARGET := $(TARGET_NAME)_libretro_psp1.a
+   CC = psp-gcc
+   CXX = psp-g++
+   AR = psp-ar
+   CFLAGS += -DPSP -G0 -DIOAPI_NO_64
+   CFLAGS += -I$(shell psp-config --pspsdk-path)/include
+   CXXFLAGS += -DPSP -G0 -DIOAPI_NO_64
+   CXXFLAGS += -I$(shell psp-config --pspsdk-path)/include
+   STATIC_LINKING = 1
 # Vita
 else ifeq ($(platform), vita)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
