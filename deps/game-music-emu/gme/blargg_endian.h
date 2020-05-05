@@ -3,6 +3,7 @@
 #ifndef BLARGG_ENDIAN
 #define BLARGG_ENDIAN
 
+#include <retro_endianness.h>
 #include "blargg_common.h"
 
 // BLARGG_CPU_CISC: Defined if CPU has very few general-purpose registers (< 16)

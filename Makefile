@@ -17,13 +17,6 @@ else ifneq ($(findstring win,$(shell uname -a)),)
 endif
 endif
 
-#detect architecture
-ifeq ($(shell uname -m),)
-   arch = i686
-else
-   arch = ($(shell uname -m)
-endif
-
 #set extension and lib path
 
 TARGET_NAME := gme
@@ -52,15 +45,6 @@ else ifeq ($(platform), osx)
 	TARGET := $(TARGET_NAME)_libretro.dylib
 	fpic := -fPIC
 	SHARED := -dynamiclib
-
-	arch = intel
-	ifeq ($(shell uname -p),powerpc)
-		arch = ppc
-	endif
-
-	ifeq ($(arch),ppc)
-		CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__
-	endif
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
 	fpic += -mmacosx-version-min=10.1
@@ -148,7 +132,7 @@ else ifeq ($(platform), ps3)
 	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
 	AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
 	CFLAGS += -DIOAPI_NO_64
-	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__ -DIOAPI_NO_64
+	CXXFLAGS += -DIOAPI_NO_64
 	STATIC_LINKING = 1
 
 # sncps3
@@ -158,7 +142,7 @@ else ifeq ($(platform), sncps3)
 	CXX = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
 	AR = $(CELL_SDK)/host-win32/sn/bin/ps3snarl.exe
 	CFLAGS += -DIOAPI_NO_64
-	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__ -DIOAPI_NO_64
+	CXXFLAGS += -DIOAPI_NO_64
 	STATIC_LINKING = 1
 
 # Lightweight PS3 Homebrew SDK
@@ -168,7 +152,7 @@ else ifeq ($(platform), psl1ght)
 	CXX = $(PS3DEV)/ppu/bin/ppu-g++$(EXE_EXT)
 	AR = $(PS3DEV)/ppu/bin/ppu-ar$(EXE_EXT)
 	CFLAGS += -DIOAPI_NO_64
-	CXXFLAGS += -DBLARGG_BIG_ENDIAN=1 -D__ppc__ -DIOAPI_NO_64
+	CXXFLAGS += -DIOAPI_NO_64
 	STATIC_LINKING = 1
 
 # Xbox 360
@@ -177,7 +161,7 @@ else ifeq ($(platform), xenon)
 	CC = xenon-gcc$(EXE_EXT)
 	CXX = xenon-g++$(EXE_EXT)
 	AR = xenon-ar$(EXE_EXT)
-	CXXFLAGS += -D__LIBXENON__ -m32 -D__ppc__
+	CXXFLAGS += -D__LIBXENON__ -m32
 	STATIC_LINKING = 1
 
 # CTR(3DS)
@@ -212,7 +196,7 @@ else ifneq (,$(filter $(platform), ngc wii wiiu))
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	CXXFLAGS += -DGEKKO -mcpu=750 -meabi -mhard-float -DBLARGG_BIG_ENDIAN=1 -D__ppc__
+	CXXFLAGS += -DGEKKO -mcpu=750 -meabi -mhard-float
 	STATIC_LINKING = 1
 	ifneq (,$(findstring wiiu,$(platform)))
 		CXXFLAGS += -DWIIU -DHW_RVL
