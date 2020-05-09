@@ -205,15 +205,17 @@ else ifneq (,$(filter $(platform), ngc wii wiiu))
 	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
-	CXXFLAGS += -DGEKKO -mcpu=750 -meabi -mhard-float
+	FLAGS := -DGEKKO -mcpu=750 -meabi -mhard-float -DIOAPI_NO_64
 	STATIC_LINKING = 1
 	ifneq (,$(findstring wiiu,$(platform)))
-		CXXFLAGS += -DWIIU -DHW_RVL
+		FLAGS += -DWIIU -DHW_RVL
 	else ifneq (,$(findstring wii,$(platform)))
-		CXXFLAGS += -DHW_RVL -mrvl
+		FLAGS += -DHW_RVL -mrvl
 	else ifneq (,$(findstring ngc,$(platform)))
-		CXXFLAGS += -DHW_DOL -mrvl
+		FLAGS += -DHW_DOL -mogc
 	endif
+	CFLAGS += $(FLAGS)
+	CXXFLAGS += $(FLAGS)
 
 # Nintendo Switch (libtransistor)
 else ifeq ($(platform), switch)
