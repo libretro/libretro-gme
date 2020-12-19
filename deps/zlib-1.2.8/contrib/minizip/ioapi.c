@@ -15,7 +15,7 @@
 #endif
 
 #if defined(__APPLE__) || defined(IOAPI_NO_64)
-#if defined(__CELLOS_LV2__) || defined(_MSC_VER) && _MSC_VER <= 1310
+#if defined(_MSC_VER) && _MSC_VER <= 1310
 #define FOPEN_FUNC(filename, mode) fopen(filename, mode)
 #define FTELLO_FUNC(stream) ftell(stream)
 #define FSEEKO_FUNC(stream, offset, origin) fseek(stream, offset, origin)

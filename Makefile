@@ -134,26 +134,6 @@ else ifeq ($(platform), vita)
 	CXXFLAGS += -DVITA -DIOAPI_NO_64 -fno-common
 	STATIC_LINKING = 1
 
-# PS3
-else ifeq ($(platform), ps3)
-	TARGET := $(TARGET_NAME)_libretro_$(platform).a
-	CC = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-gcc.exe
-	CXX = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-g++.exe
-	AR = $(CELL_SDK)/host-win32/ppu/bin/ppu-lv2-ar.exe
-	CFLAGS += -DIOAPI_NO_64
-	CXXFLAGS += -DIOAPI_NO_64
-	STATIC_LINKING = 1
-
-# sncps3
-else ifeq ($(platform), sncps3)
-	TARGET := $(TARGET_NAME)_libretro_ps3.a
-	CC = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
-	CXX = $(CELL_SDK)/host-win32/sn/bin/ps3ppusnc.exe
-	AR = $(CELL_SDK)/host-win32/sn/bin/ps3snarl.exe
-	CFLAGS += -DIOAPI_NO_64
-	CXXFLAGS += -DIOAPI_NO_64
-	STATIC_LINKING = 1
-
 # Lightweight PS3 Homebrew SDK
 else ifeq ($(platform), psl1ght)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
