@@ -4,6 +4,11 @@
  */
 
 #include <stdio.h>
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
 #include "gzguts.h"
 
 #if defined(_WIN32) && !defined(__BORLANDC__)
