@@ -33,3 +33,6 @@
 *.su
 
 build
+
+# VS Code
+.vscode
