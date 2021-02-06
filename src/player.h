@@ -1,6 +1,5 @@
 #ifndef GME_LIBRETRO_PLAYER_H__
 #define GME_LIBRETRO_PLAYER_H__
-#include <stdio.h>
 #include <stdlib.h>
 #include <boolean.h>
 #include "gme.h"

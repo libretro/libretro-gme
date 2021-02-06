@@ -1,6 +1,7 @@
-#include "player.h"
+#include <stdio.h>
 #include <string.h>
 #include <boolean.h>
+#include "player.h"
 #include "playlist.h"
 #include "fileformat.h"
 #include "log.h"

@@ -9,6 +9,10 @@ INCFLAGS 			= -I$(CORE_DIR) \
 						  -I$(DEPS_DIR)/zlib-1.2.8/contrib/minizip \
 						  -I$(DEPS_DIR)/font8x8
 
+ifneq (,$(findstring msvc200,$(platform)))
+INCFLAGS += -I$(LIBRETRO_COMM_DIR)/include/compat/msvc
+endif
+
 SOURCES_CXX := \
 					$(GME_DIR)/gme/Ay_Apu.cpp \
 					$(GME_DIR)/gme/Ay_Cpu.cpp \
