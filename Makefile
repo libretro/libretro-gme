@@ -525,11 +525,4 @@ all: $(EXECUTABLE)
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
 
-install:
-	cp $(EXECUTABLE) /usr/local/lib/libretro
-	cp $(INFO) /usr/local/lib/libretro
-
-test:
-	retroarch --verbose -L ~/.config/retroarch/cores/$(EXECUTABLE) "./test/Final Fantasy 6 [ff6].zip"
-
-.PHONY: clean install test
+.PHONY: clean
