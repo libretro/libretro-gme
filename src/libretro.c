@@ -87,7 +87,7 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name = "Game Music Emulator";
    info->library_version = "v0.6.1";
-   info->need_fullpath = true;
+   info->need_fullpath = false;
    info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz|zip";
    info->block_extract = true;
 }
