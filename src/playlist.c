@@ -9,23 +9,19 @@
 bool get_playlist(const char *path, playlist **dest_pl)
 {
 	//local variables
-	int i,j,position;
-	Music_Emu *temp_emu;
-	gme_file_data *gfd;
+	int i,j;
+	int position = 0;
+	Music_Emu *temp_emu = NULL;
+	gme_file_data *gfd = NULL;
 	gme_err_t err_msg;
-	playlist *pl;
+	playlist *pl = NULL;
 	//init playlist
-	pl = malloc(sizeof(playlist));
-	pl->num_files = 0;
-	pl->files = NULL;
-	pl->num_tracks = 0;
-	pl->tracks = NULL;
+	pl = (playlist *)calloc(1, sizeof(playlist));
 	//load libretro content file
 	if(get_playlist_gme_files(path,&(pl->files),&(pl->num_files),&(pl->num_tracks)))
 	{
-		pl->tracks = malloc(sizeof(gme_track_data*) * pl->num_tracks);
+		pl->tracks = (gme_track_data **)calloc(pl->num_tracks, sizeof(gme_track_data*));
 		//read tracks
-		position = 0;
 		for(i=0;i<pl->num_files;i++)
 		{
 			gfd = pl->files[i];
@@ -42,13 +38,26 @@ bool get_playlist(const char *path, playlist **dest_pl)
 				}				
 			}
 			else
-				return false;
+				goto error;
+
+			gme_delete(temp_emu);
+			temp_emu = NULL;
 		}
 	}
 	else
-		return false;
+		goto error;
+
 	*dest_pl = pl;
 	return true;
+
+error:
+	if (temp_emu)
+		gme_delete(temp_emu);
+
+	if (pl)
+		cleanup_playlist(pl);
+
+	return false;
 }
 
 bool get_playlist_gme_files(const char *path,gme_file_data ***dest_files,int *dest_num_files, int *dest_num_tracks)

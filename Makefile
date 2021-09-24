@@ -477,6 +477,10 @@ endif
 CFLAGS   += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
 CXXFLAGS += -Wall $(INCFLAGS) $(INCFLAGS_PLATFORM)
 
+ifeq ($(DEBUG),1)
+CFLAGS += -O0 -g
+endif
+
 ifneq (,$(findstring msvc,$(platform)))
 ifeq ($(DEBUG),1)
 CFLAGS += -MTd
