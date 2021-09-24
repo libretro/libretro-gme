@@ -37,7 +37,8 @@ bool open_file(const char *path, long sample_rate)
 
 void close_file(void)
 {
-	gme_delete( emu );
+	gme_delete(emu);
+	emu = NULL;
 	if(plist!=NULL)
 		cleanup_playlist(plist);
 }

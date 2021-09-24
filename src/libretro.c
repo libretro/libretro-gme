@@ -10,7 +10,7 @@
 #include "log.h"
 
 // Static globals
-static surface *framebuffer = NULL;;
+static surface *framebuffer = NULL;
 static uint16_t previnput = 0;
 
 // Callbacks
@@ -87,7 +87,7 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name = "Game Music Emulator";
    info->library_version = "v0.6.1";
-   info->need_fullpath = false;
+   info->need_fullpath = true;
    info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz|zip";
    info->block_extract = true;
 }
@@ -123,7 +123,9 @@ void retro_init(void)
 // End of retrolib
 void retro_deinit(void)
 {
-   free(framebuffer);
+   if (framebuffer)
+      free_surface(framebuffer);
+   framebuffer = NULL;
 }
 
 // Reset gme
@@ -171,8 +173,7 @@ bool retro_load_game(const struct retro_game_info *info)
 {
    long sample_rate = 44100;
 
-   // ensure there is ROM data
-   if (!info || !info->data)
+   if (!info)
       return false;
 
    if(open_file(info->path,sample_rate))

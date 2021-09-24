@@ -187,9 +187,11 @@ bool get_file_data(const char *path,file_data ***dest_files, int *dest_numfiles)
     else
     {
         file_data *fd;
+        fp = fopen(path,"rb");
+        if (!fp)
+            return false;
         files = malloc(sizeof(file_data*));
         fd = malloc(sizeof(file_data));
-        fp = fopen(path,"rb");
         //get file length
         fseek (fp,0,SEEK_END);
         fd->length = ftell(fp);
