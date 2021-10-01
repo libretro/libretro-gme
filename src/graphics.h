@@ -8,11 +8,12 @@
 #define get_pixel(surf,x,y) ((unsigned short *)surf->pixel_data)[(x)+((y)*surf->width)]
 #define is_font_pixel(x,y) (((unsigned short *)font.pixel_data)[(x)+((y)*font.width)] == 0 ? 1 : 0)
 
-typedef struct {
-  unsigned int 	 width;
-  unsigned int 	 height;
-  unsigned int 	 bytes_per_pixel; /* 2:RGB16, 3:RGB, 4:RGBA */ 
-  char  		*pixel_data;
+typedef struct
+{
+   unsigned int 	 width;
+   unsigned int 	 height;
+   unsigned int 	 bytes_per_pixel; /* 2:RGB16, 3:RGB, 4:RGBA */ 
+   char  		   *pixel_data;
 } surface;
 
 unsigned short get_color(char r, char g, char b);
@@ -25,8 +26,6 @@ void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w
 void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, int pos_y);
 void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter);
 int get_string_length(char* text);
-
-
 
 /* GIMP RGBA C-Source image dump (font.c) */
 static const surface font = {

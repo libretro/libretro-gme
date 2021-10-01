@@ -8,104 +8,100 @@
 
 bool get_playlist(const char *path, playlist **dest_pl)
 {
-	//local variables
-	int i,j;
-	int position = 0;
-	Music_Emu *temp_emu = NULL;
-	gme_file_data *gfd = NULL;
-	gme_err_t err_msg;
-	playlist *pl = NULL;
-	//init playlist
-	pl = (playlist *)calloc(1, sizeof(playlist));
-	//load libretro content file
-	if(get_playlist_gme_files(path,&(pl->files),&(pl->num_files),&(pl->num_tracks)))
-	{
-		pl->tracks = (gme_track_data **)calloc(pl->num_tracks, sizeof(gme_track_data*));
-		//read tracks
-		for(i=0;i<pl->num_files;i++)
-		{
-			gfd = pl->files[i];
-			temp_emu = gme_new_emu(gfd->file_type,gme_info_only);
-			err_msg = gme_load_data(temp_emu,gfd->data,gfd->length);
-			if(err_msg==NULL)
-			{
-				for(j=0;j<gfd->num_tracks;j++)
-				{
-					if(get_track_data(temp_emu,i,j,gfd->name,&(pl->tracks[position])))
-					{
-						position++;
-					}
-				}				
-			}
-			else
-				goto error;
+   //local variables
+   int i,j;
+   int position = 0;
+   Music_Emu *temp_emu = NULL;
+   gme_file_data *gfd = NULL;
+   gme_err_t err_msg;
+   //init playlist
+   playlist *pl = (playlist *)calloc(1, sizeof(playlist));
+   //load libretro content file
+   if(get_playlist_gme_files(path,&(pl->files),&(pl->num_files),&(pl->num_tracks)))
+   {
+      pl->tracks = (gme_track_data **)calloc(pl->num_tracks, sizeof(gme_track_data*));
+      //read tracks
+      for(i=0;i<pl->num_files;i++)
+      {
+         gfd      = pl->files[i];
+         temp_emu = gme_new_emu(gfd->file_type,gme_info_only);
+         err_msg  = gme_load_data(temp_emu,gfd->data,gfd->length);
 
-			gme_delete(temp_emu);
-			temp_emu = NULL;
-		}
-	}
-	else
-		goto error;
+         if (err_msg)
+            goto error;
 
-	*dest_pl = pl;
-	return true;
+         for(j=0;j<gfd->num_tracks;j++)
+         {
+            if(get_track_data(temp_emu,i,j,gfd->name,
+                     &(pl->tracks[position])))
+               position++;
+         }				
+
+         gme_delete(temp_emu);
+         temp_emu = NULL;
+      }
+   }
+   else
+      goto error;
+
+   *dest_pl = pl;
+   return true;
 
 error:
-	if (temp_emu)
-		gme_delete(temp_emu);
+   if (temp_emu)
+      gme_delete(temp_emu);
 
-	if (pl)
-		cleanup_playlist(pl);
+   if (pl)
+      cleanup_playlist(pl);
 
-	return false;
+   return false;
 }
 
 bool get_playlist_gme_files(const char *path,gme_file_data ***dest_files,int *dest_num_files, int *dest_num_tracks)
 {
-	int i;
-	bool success              = true;
-	file_data **files         = NULL;
-	gme_file_data **gme_files = NULL;
-	int num_files             = 0;
-	int num_tracks            = 0;
+   int i;
+   bool success              = true;
+   file_data **files         = NULL;
+   gme_file_data **gme_files = NULL;
+   int num_files             = 0;
+   int num_tracks            = 0;
 
-	if(get_file_data(path,&files,&num_files)) {
-		gme_files = malloc(sizeof(gme_file_data*) * num_files);
-		for(i=0;i< num_files;i++)
-		{
-			gme_files[i] = NULL;
-			if(!get_gme_file_data(files[i],&(gme_files[i])))
-			{
-				success = false;
-				break;
-			}
-			free(files[i]);
-			if(gme_files[i]==NULL)
-			{
-				success = false;
-				break;
-			}
-			num_tracks += gme_files[i]->num_tracks;
-		}
-		free(files);
-	}
-	else
-		success = false;
-	*dest_files = gme_files;
-	*dest_num_files = num_files;
-	*dest_num_tracks = num_tracks;
-	return success;
+   if(get_file_data(path,&files,&num_files))
+   {
+      gme_files = malloc(sizeof(gme_file_data*) * num_files);
+      for(i=0;i< num_files;i++)
+      {
+         gme_files[i] = NULL;
+         if(!get_gme_file_data(files[i],&(gme_files[i])))
+         {
+            success = false;
+            break;
+         }
+         free(files[i]);
+         if(gme_files[i]==NULL)
+         {
+            success = false;
+            break;
+         }
+         num_tracks += gme_files[i]->num_tracks;
+      }
+      free(files);
+   }
+   else
+      success = false;
+   *dest_files = gme_files;
+   *dest_num_files = num_files;
+   *dest_num_tracks = num_tracks;
+   return success;
 }
 
 bool get_gme_file_data(file_data *fd,gme_file_data **dest_gfd)
 {
 	Music_Emu* temp_emu;
 	gme_err_t err_msg;
-	char *ext;
-	gme_file_data *gfd;
-	gfd = malloc(sizeof(gme_file_data));
+	gme_file_data *gfd = malloc(sizeof(gme_file_data));
 	//set playlist type
-	ext = strrchr(fd->name,'.') +1;
+	char *ext = strrchr(fd->name,'.') +1;
 	//check extension to determine player type
 	if(strcmp(ext,"ay")==0 || strcmp(ext,"AY")==0)
 		gfd->file_type = gme_ay_type;
@@ -153,43 +149,42 @@ bool get_gme_file_data(file_data *fd,gme_file_data **dest_gfd)
 
 bool get_track_data(Music_Emu* emu, int fileid, int trackid, char *filename,gme_track_data **dest_gtd)
 {
-	gme_info_t* ti;
-	gme_track_data *gtd;
-	gtd = malloc(sizeof(gme_track_data));
-	gtd->file_id = fileid;
-	gtd->track_id = trackid;
-	gme_track_info(emu, &ti,trackid);
-	//game name
-	if(strcmp(ti->game,"")==0)
-	{
-		gtd->game_name = calloc(strlen(filename)+1,sizeof(char));
-		strcpy(gtd->game_name,filename);
-	}
-	else
-	{
-		gtd->game_name = calloc(strlen(ti->game)+1,sizeof(char));
-		strcpy(gtd->game_name,ti->game);
-	}
-	//track length
-	gtd->track_length = ti->length;
-	if ( gtd->track_length <= 0 )
-		gtd->track_length = ti->intro_length + ti->loop_length * 2;
-	if ( gtd->track_length <= 0 )
-		gtd->track_length = (long) (2.5 * 60 * 1000);
-	//track name
-	if(strcmp(ti->song,"") == 0)
-	{
-		gtd->track_name = calloc(10,sizeof(char));
-		sprintf(gtd->track_name, "Track %i",trackid+1);
-	}
-	else
-	{
-		gtd->track_name = calloc(strlen(ti->song)+1,sizeof(char));
-		strcpy(gtd->track_name, ti->song);
-	}
-	gme_free_info(ti);
-	*dest_gtd = gtd;
-	return true;
+   gme_info_t* ti;
+   gme_track_data *gtd = malloc(sizeof(gme_track_data));
+   gtd->file_id        = fileid;
+   gtd->track_id       = trackid;
+   gme_track_info(emu, &ti,trackid);
+   //game name
+   if(strcmp(ti->game,"")==0)
+   {
+      gtd->game_name = calloc(strlen(filename)+1,sizeof(char));
+      strcpy(gtd->game_name,filename);
+   }
+   else
+   {
+      gtd->game_name = calloc(strlen(ti->game)+1,sizeof(char));
+      strcpy(gtd->game_name,ti->game);
+   }
+   //track length
+   gtd->track_length = ti->length;
+   if ( gtd->track_length <= 0 )
+      gtd->track_length = ti->intro_length + ti->loop_length * 2;
+   if ( gtd->track_length <= 0 )
+      gtd->track_length = (long) (2.5 * 60 * 1000);
+   //track name
+   if(strcmp(ti->song,"") == 0)
+   {
+      gtd->track_name = calloc(10,sizeof(char));
+      sprintf(gtd->track_name, "Track %i",trackid+1);
+   }
+   else
+   {
+      gtd->track_name = calloc(strlen(ti->song)+1,sizeof(char));
+      strcpy(gtd->track_name, ti->song);
+   }
+   gme_free_info(ti);
+   *dest_gtd = gtd;
+   return true;
 }
 
 bool cleanup_playlist(playlist *playlist)	
