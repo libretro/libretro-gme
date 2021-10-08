@@ -6,7 +6,6 @@
 
 #include "fileformat.h"
 #include "unzip.h"
-#include "log.h"
 
 static const char *gme_allowed_exts[] = {
     "ay","AY",
@@ -25,8 +24,7 @@ static const char *gme_allowed_exts[] = {
 static bool is_gme_allowed_ext(char *ext)
 {
    int i;
-   int arr_length;
-   arr_length = sizeof(gme_allowed_exts) / sizeof(char*);
+   int arr_length = sizeof(gme_allowed_exts) / sizeof(char*);
    for(i=0;i<arr_length;i++)
    {
       if(strcmp(ext,gme_allowed_exts[i])==0)
@@ -43,28 +41,27 @@ static bool uncompress_file_data(file_data** fd)
    file_data* src_fd  = *fd;
    file_data* dest_fd = NULL;
 
-   srcLen = src_fd->length;
+   srcLen             = src_fd->length;
    memcpy(&dstLen,&(src_fd->data[src_fd->length-4]),4);
-   dest_fd = malloc(sizeof(file_data));
-   dest_fd->length = dstLen;
-   dest_fd->name = calloc(strlen(src_fd->name)+1,sizeof(char));
+   dest_fd            = malloc(sizeof(file_data));
+   dest_fd->length    = dstLen;
+   dest_fd->name      = calloc(strlen(src_fd->name)+1,sizeof(char));
    strcpy(dest_fd->name,src_fd->name);
-   dest_fd->data = malloc(dstLen * sizeof(char));
-   strm.total_in  = strm.avail_in  = srcLen;
-   strm.total_out = strm.avail_out = dstLen;
-   strm.next_in   = (Bytef *) src_fd->data;
-   strm.next_out  = (Bytef *) dest_fd->data;
+   dest_fd->data      = malloc(dstLen * sizeof(char));
+   strm.total_in      = strm.avail_in  = srcLen;
+   strm.total_out     = strm.avail_out = dstLen;
+   strm.next_in       = (Bytef *) src_fd->data;
+   strm.next_out      = (Bytef *) dest_fd->data;
 
-   strm.zalloc = Z_NULL;
-   strm.zfree  = Z_NULL;
-   strm.opaque = Z_NULL;
+   strm.zalloc        = Z_NULL;
+   strm.zfree         = Z_NULL;
+   strm.opaque        = Z_NULL;
 
-
-   err = inflateInit2(&strm, (15 + 32)); //15 window bits, and the +32 tells zlib to to detect if using gzip or zlib
-   if (err == Z_OK)
+   // 15 window bits, and the +32 tells zlib 
+   // to to detect if using gzip or zlib
+   if ((err = inflateInit2(&strm, (15 + 32))) == Z_OK)
    {
-      err = inflate(&strm, Z_FINISH);
-      if (err != Z_STREAM_END)
+      if ((err = inflate(&strm, Z_FINISH)) != Z_STREAM_END)
       {
          inflateEnd(&strm);
          return false;
@@ -75,6 +72,7 @@ static bool uncompress_file_data(file_data** fd)
       inflateEnd(&strm);
       return false;
    }
+
    inflateEnd(&strm);
    free(src_fd->data);
    free(src_fd->name);
@@ -83,35 +81,31 @@ static bool uncompress_file_data(file_data** fd)
    return true;
 }
 
-static bool get_files_from_zip(const char *path, file_data ***dest_files, int *dest_numfiles)
+static bool get_files_from_zip(const char *path,
+      file_data ***dest_files, int *dest_numfiles)
 {
-   unzFile uf = NULL;
+   int i;
+   char *ext;
    unz_global_info64 gi;
    unz_file_info64 file_info;
-   int i;
    char filename_inzip[256];
-   char *ext;
    file_data **files;
    int numfiles,position;
-
    //load zip content
-   uf = unzOpen64(path);
+   unzFile uf = unzOpen64(path);
    unzGetGlobalInfo64(uf,&gi);
    numfiles = (int)gi.number_entry;
-   files = malloc(sizeof(file_data*) * numfiles);
+   files    = malloc(sizeof(file_data*) * numfiles);
    position = 0;
    for(i=0;i<gi.number_entry;i++)
    {
       void* buf;
-      int err;
       int bytes_read;
       uInt size_buf = 8192;
       //read compressed file info
-      err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
+      int err = unzGetCurrentFileInfo64(uf,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
       if(err!=UNZ_OK)
-      {
          return false;
-      }
       if(filename_inzip[file_info.size_filename -1]=='/')
          ext = strrchr(filename_inzip,'/');
       else
@@ -132,7 +126,7 @@ static bool get_files_from_zip(const char *path, file_data ***dest_files, int *d
             return false;
          //read file from zip
          err = unzOpenCurrentFilePassword(uf,NULL);
-         if (err!=UNZ_OK)
+         if (err != UNZ_OK)
             return false;
          //get data from zip
          do 

@@ -4,7 +4,9 @@
 #include "file/file_path.h"
 
 #include "playlist.h"
-#include "log.h"
+#include "libretro.h"
+
+extern retro_log_printf_t log_cb;
 
 bool get_playlist(const char *path, playlist **dest_pl)
 {
@@ -97,54 +99,54 @@ bool get_playlist_gme_files(const char *path,gme_file_data ***dest_files,int *de
 
 bool get_gme_file_data(file_data *fd,gme_file_data **dest_gfd)
 {
-	Music_Emu* temp_emu;
-	gme_err_t err_msg;
-	gme_file_data *gfd = malloc(sizeof(gme_file_data));
-	//set playlist type
-	char *ext = strrchr(fd->name,'.') +1;
-	//check extension to determine player type
-	if(strcmp(ext,"ay")==0 || strcmp(ext,"AY")==0)
-		gfd->file_type = gme_ay_type;
-	else if(strcmp(ext,"gbs")==0 || strcmp(ext,"GBS")==0)
-		gfd->file_type = gme_gbs_type;
-	else if(strcmp(ext,"gym")==0 || strcmp(ext,"GYM")==0)
-		gfd->file_type = gme_gym_type;
-	else if(strcmp(ext,"hes")==0 || strcmp(ext,"HES")==0)
-		gfd->file_type = gme_hes_type;
-	else if(strcmp(ext,"kss")==0 || strcmp(ext,"KSS")==0)
-		gfd->file_type = gme_kss_type;
-	else if(strcmp(ext,"nsf")==0 || strcmp(ext,"NSF")==0)
-		gfd->file_type = gme_nsf_type;
-	else if(strcmp(ext,"nsfe")==0 || strcmp(ext,"NSFE")==0)
-		gfd->file_type = gme_nsfe_type;
-	else if(strcmp(ext,"sap")==0 || strcmp(ext,"SAP")==0)
-		gfd->file_type = gme_sap_type;
-	else if(strcmp(ext,"spc") == 0 || strcmp(ext,"SPC")==0)
-		gfd->file_type = gme_spc_type;
-	else if(strcmp(ext,"vgm") == 0 || strcmp(ext,"VGM")==0)
-		gfd->file_type = gme_vgm_type;
-	else if(strcmp(ext,"vgz") == 0 || strcmp(ext,"VGZ")==0)
-		gfd->file_type = gme_vgz_type;
-	else
-		return false;
-	temp_emu = gme_new_emu(gfd->file_type,gme_info_only);
-	err_msg = gme_load_data(temp_emu,fd->data,fd->length);
-	if(err_msg==NULL)
-		gfd->num_tracks = gme_track_count(temp_emu);
-	else
-	{
-		handle_error(err_msg);
-		return false;
-	}
-	gme_delete( temp_emu );
-	//deep copy file data
-	gfd->name = calloc(strlen(fd->name)+1,sizeof(char));
-	strcpy(gfd->name,fd->name);
-	gfd->data = malloc(fd->length * sizeof(char));
-	memcpy(gfd->data,fd->data,fd->length);
-	gfd->length = fd->length;
-	*dest_gfd = gfd;
-	return true;
+   Music_Emu* temp_emu;
+   gme_err_t err_msg;
+   gme_file_data *gfd = malloc(sizeof(gme_file_data));
+   //set playlist type
+   char *ext = strrchr(fd->name,'.') +1;
+   //check extension to determine player type
+   if(strcmp(ext,"ay")==0 || strcmp(ext,"AY")==0)
+      gfd->file_type = gme_ay_type;
+   else if(strcmp(ext,"gbs")==0 || strcmp(ext,"GBS")==0)
+      gfd->file_type = gme_gbs_type;
+   else if(strcmp(ext,"gym")==0 || strcmp(ext,"GYM")==0)
+      gfd->file_type = gme_gym_type;
+   else if(strcmp(ext,"hes")==0 || strcmp(ext,"HES")==0)
+      gfd->file_type = gme_hes_type;
+   else if(strcmp(ext,"kss")==0 || strcmp(ext,"KSS")==0)
+      gfd->file_type = gme_kss_type;
+   else if(strcmp(ext,"nsf")==0 || strcmp(ext,"NSF")==0)
+      gfd->file_type = gme_nsf_type;
+   else if(strcmp(ext,"nsfe")==0 || strcmp(ext,"NSFE")==0)
+      gfd->file_type = gme_nsfe_type;
+   else if(strcmp(ext,"sap")==0 || strcmp(ext,"SAP")==0)
+      gfd->file_type = gme_sap_type;
+   else if(strcmp(ext,"spc") == 0 || strcmp(ext,"SPC")==0)
+      gfd->file_type = gme_spc_type;
+   else if(strcmp(ext,"vgm") == 0 || strcmp(ext,"VGM")==0)
+      gfd->file_type = gme_vgm_type;
+   else if(strcmp(ext,"vgz") == 0 || strcmp(ext,"VGZ")==0)
+      gfd->file_type = gme_vgz_type;
+   else
+      return false;
+   temp_emu = gme_new_emu(gfd->file_type,gme_info_only);
+   err_msg  = gme_load_data(temp_emu,fd->data,fd->length);
+   if (!err_msg)
+      gfd->num_tracks = gme_track_count(temp_emu);
+   else
+   {
+      log_cb(RETRO_LOG_ERROR, "[GME] Error: %s\n", err_msg);
+      return false;
+   }
+   gme_delete( temp_emu );
+   //deep copy file data
+   gfd->name = calloc(strlen(fd->name)+1,sizeof(char));
+   strcpy(gfd->name,fd->name);
+   gfd->data = malloc(fd->length * sizeof(char));
+   memcpy(gfd->data,fd->data,fd->length);
+   gfd->length = fd->length;
+   *dest_gfd = gfd;
+   return true;
 }
 
 bool get_track_data(Music_Emu* emu, int fileid, int trackid, char *filename,gme_track_data **dest_gtd)
@@ -189,37 +191,37 @@ bool get_track_data(Music_Emu* emu, int fileid, int trackid, char *filename,gme_
 
 bool cleanup_playlist(playlist *playlist)	
 {
-	int i;
-	if(playlist->tracks!=NULL)
-	{
-		for(i=0;i<playlist->num_tracks;i++)
-      	{
-         	if(playlist->tracks[i] != NULL)
-         	{
-				if(playlist->tracks[i]->game_name != NULL)
-	            	free(playlist->tracks[i]->game_name);
-				if(playlist->tracks[i]->track_name != NULL)
-	            	free(playlist->tracks[i]->track_name);
-	         	free(playlist->tracks[i]);
-         	}
-      	}
-      	free(playlist->tracks);
-	}
-	if(playlist->files!=NULL)
-	{
-		for(i=0;i<playlist->num_files;i++)
-		{
-			if(playlist->files[i] != NULL)
-			{
-				if(playlist->files[i]->data != NULL)
-					free(playlist->files[i]->data);
-				if(playlist->files[i]->name != NULL)
-					free(playlist->files[i]->name);
-				free(playlist->files[i]);
-			}
-		}
-		free(playlist->files);
-	}
-	free(playlist);
-	return true;
+   int i;
+   if(playlist->tracks!=NULL)
+   {
+      for(i=0;i<playlist->num_tracks;i++)
+      {
+         if(playlist->tracks[i] != NULL)
+         {
+            if(playlist->tracks[i]->game_name != NULL)
+               free(playlist->tracks[i]->game_name);
+            if(playlist->tracks[i]->track_name != NULL)
+               free(playlist->tracks[i]->track_name);
+            free(playlist->tracks[i]);
+         }
+      }
+      free(playlist->tracks);
+   }
+   if(playlist->files!=NULL)
+   {
+      for(i=0;i<playlist->num_files;i++)
+      {
+         if(playlist->files[i] != NULL)
+         {
+            if(playlist->files[i]->data != NULL)
+               free(playlist->files[i]->data);
+            if(playlist->files[i]->name != NULL)
+               free(playlist->files[i]->name);
+            free(playlist->files[i]);
+         }
+      }
+      free(playlist->files);
+   }
+   free(playlist);
+   return true;
 }

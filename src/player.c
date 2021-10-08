@@ -4,7 +4,9 @@
 #include "player.h"
 #include "playlist.h"
 #include "fileformat.h"
-#include "log.h"
+#include "libretro.h"
+
+extern retro_log_printf_t log_cb;
 
 static playlist *plist = NULL;
 static gme_track_data *track = NULL;
@@ -45,38 +47,36 @@ void close_file(void)
 
 void start_track(int tracknr)
 {
-	char message[256];
-	memset(audio_buffer,0,8192 * sizeof(short));
-	current_track = tracknr;
-	track = plist->tracks[tracknr];
-	if(track)
-	{
-		//change emu if file changes
-		if(track->file_id != prev_fileid)
-		{
-			is_playing_ = false;
-			file = plist->files[track->file_id];
-			prev_fileid = track->file_id;
-			if (emu)
-				gme_delete (emu);		
-			emu = gme_new_emu(file->file_type,sample_rate_);
-			gme_load_data(emu,file->data,file->length);
-			is_playing_ = true;
-		}
-	}
-	else
-	{
-		strcpy(message,"Unknown track type");
-		handle_error(message);
-		is_playing_ = false;				
-	}
-	if(is_playing_)
-		gme_start_track(emu, track->track_id);
+   memset(audio_buffer,0,8192 * sizeof(short));
+   current_track = tracknr;
+   track = plist->tracks[tracknr];
+   if(track)
+   {
+      //change emu if file changes
+      if(track->file_id != prev_fileid)
+      {
+         is_playing_ = false;
+         file = plist->files[track->file_id];
+         prev_fileid = track->file_id;
+         if (emu)
+            gme_delete (emu);		
+         emu = gme_new_emu(file->file_type,sample_rate_);
+         gme_load_data(emu,file->data,file->length);
+         is_playing_ = true;
+      }
+   }
+   else
+   {
+      log_cb(RETRO_LOG_ERROR, "[GME] Error: Unknown track type.\n" );
+      is_playing_ = false;				
+   }
+   if (is_playing_)
+      gme_start_track(emu, track->track_id);
 }
 
 short *play(void)
 {
-   if(is_playing_)
+   if (is_playing_)
    {
       if(gme_track_ended(emu))
       {
@@ -125,15 +125,15 @@ char *get_song_name(char *buf)
 
 char *get_track_position(char *buf)
 {
-	long seconds         = track->track_length / 1000;
-	long elapsed_seconds = gme_tell(emu)       / 1000;
-	sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
-	return buf;
+   long seconds         = track->track_length / 1000;
+   long elapsed_seconds = gme_tell(emu)       / 1000;
+   sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
+   return buf;
 }
 
 int get_track_elapsed_frames(void)
 {
-	return gme_tell_samples(emu)/1470;
+   return gme_tell_samples(emu) / 1470;
 }
 
 void play_pause(void)

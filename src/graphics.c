@@ -6,8 +6,7 @@
 
 unsigned short get_color(char r, char g, char b)
 {
-   unsigned short color= (r << 11) | (g << 5) | b;
-   return color;
+   return (r << 11) | (g << 5) | b;
 }
 
 surface *create_surface(unsigned int width, unsigned int height, unsigned int bpp)
@@ -131,56 +130,55 @@ void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w
 void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, int pos_y)
 {
    int y, x;
-	//calculate letter offset
-	int charx = (letter % 16) * 8;
-	int chary = (letter >> 4) * 8;
+   //calculate letter offset
+   int charx = (letter % 16) * 8;
+   int chary = (letter >> 4) * 8;
 
-	for(y=0;y<8;y++)
-	{
-		for(x=0;x<8;x++)
-		{
-			if(is_font_pixel(charx+x,chary+y))
-				set_pixel(surf,pos_x+x,pos_y+y,color);
-		}
-	}		
+   for(y=0;y<8;y++)
+   {
+      for(x=0;x<8;x++)
+      {
+         if(is_font_pixel(charx+x,chary+y))
+            set_pixel(surf,pos_x+x,pos_y+y,color);
+      }
+   }		
 }
 
 void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter)
 {
    int x;
-	int x_offset = 0;
-	int delta = 0;
-	int delay = 30;
-	int modulo = 0;
-	int frame_delay = 2;
-	int msglen = strlen(text);
+   int x_offset = 0;
+   int delta = 0;
+   int delay = 30;
+   int modulo = 0;
+   int frame_delay = 2;
+   int msglen = strlen(text);
    surface *clipped_surface = NULL;
-	surface *temp_surface    = create_surface((msglen*8),8,2);	
+   surface *temp_surface    = create_surface((msglen*8),8,2);	
 
-	for(x=0;x<msglen;x++)
-		draw_letter(temp_surface,color,text[x],(x*8),0);
+   for(x=0;x<msglen;x++)
+      draw_letter(temp_surface,color,text[x],(x*8),0);
 
-	if((msglen*8)>280)
-	{
-		delta    = (msglen*8) -280;
-		modulo   = delta + (delay * 2);
-		x_offset = (modulo - abs(framecounter/frame_delay % (2*modulo) - modulo)) - delay; // triangle function
-		x_offset = MAX(x_offset,0); //clamp left to add delay
-		x_offset = MIN(x_offset,delta); //clamp right to add delay
-	}
+   if((msglen*8)>280)
+   {
+      delta    = (msglen*8) -280;
+      modulo   = delta + (delay * 2);
+      x_offset = (modulo - abs(framecounter/frame_delay % (2*modulo) - modulo)) - delay; // triangle function
+      x_offset = MAX(x_offset,0); //clamp left to add delay
+      x_offset = MIN(x_offset,delta); //clamp right to add delay
+   }
 
-	clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,21,21,299,219);
+   clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,21,21,299,219);
 
-	if (clipped_surface)
-	{
-		copy_surface(clipped_surface,surf,0,0,pos_x,pos_y,clipped_surface->width,clipped_surface->height);
-		free_surface(clipped_surface);		
-	}
-	free_surface(temp_surface);
+   if (clipped_surface)
+   {
+      copy_surface(clipped_surface,surf,0,0,pos_x,pos_y,clipped_surface->width,clipped_surface->height);
+      free_surface(clipped_surface);		
+   }
+   free_surface(temp_surface);
 }
 
 int get_string_length(char* text)
 {
-	int ln = strlen(text);
-	return ln * 8;
+	return strlen(text) * 8;
 }

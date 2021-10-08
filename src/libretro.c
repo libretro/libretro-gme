@@ -7,13 +7,14 @@
 
 #include "graphics.h"
 #include "player.h"
-#include "log.h"
 
 // Static globals
 static surface *framebuffer = NULL;
 static uint16_t previnput = 0;
 
 // Callbacks
+
+retro_log_printf_t log_cb;
 
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t input_poll_cb;
@@ -76,9 +77,6 @@ static void draw_ui(void)
    free(message);
 }
 
-void handle_error( const char* error );
-void handle_info( const char* info);
-
 /*
  * Tell libretro about this core, it's name, version and which rom files it supports.
  */
@@ -114,7 +112,12 @@ void retro_init(void)
 {
    unsigned level = 0;
    /* set up some logging */
-   init_log(environ_cb);
+   struct retro_log_callback log;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
+      log_cb = log.log;
+   else
+      log_cb = NULL;
+
    // the performance level is guide to frontend to give an idea of how intensive this core is to run
    environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
    framebuffer = create_surface(320,240,2);
@@ -171,12 +174,7 @@ void retro_run(void)
 // File Loading
 bool retro_load_game(const struct retro_game_info *info)
 {
-   long sample_rate = 44100;
-
-   if (!info)
-      return false;
-
-   if(open_file(info->path,sample_rate))
+   if (info && open_file(info->path, 44100))
       return true;
    return false;
 }
