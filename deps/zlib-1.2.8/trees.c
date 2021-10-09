@@ -78,39 +78,7 @@ local const uch bl_order[BL_CODES]
 
 #define DIST_CODE_LEN  512 /* see definition of array dist_code below */
 
-#if !defined(STDC)
-/* non ANSI compilers may not accept trees.h */
-
-local ct_data static_ltree[L_CODES+2];
-/* The static literal tree. Since the bit lengths are imposed, there is no
- * need for the L_CODES extra codes used during heap construction. However
- * The codes 286 and 287 are needed to build a canonical tree (see _tr_init
- * below).
- */
-
-local ct_data static_dtree[D_CODES];
-/* The static distance tree. (Actually a trivial tree since all codes use
- * 5 bits.)
- */
-
-uch _dist_code[DIST_CODE_LEN];
-/* Distance codes. The first 256 values correspond to the distances
- * 3 .. 258, the last 256 values correspond to the top 8 bits of
- * the 15 bit distances.
- */
-
-uch _length_code[MAX_MATCH-MIN_MATCH+1];
-/* length code for each normalized match length (0 == MIN_MATCH) */
-
-local int base_length[LENGTH_CODES];
-/* First normalized length for each code (0 = MIN_MATCH) */
-
-local int base_dist[D_CODES];
-/* First normalized distance for each code (0 = distance of 1) */
-
-#else
-#  include "trees.h"
-#endif /* GEN_TREES_H */
+#include "trees.h"
 
 struct static_tree_desc_s {
     const ct_data *static_tree;  /* static tree or NULL */
