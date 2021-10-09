@@ -1,11 +1,22 @@
 #include <stdlib.h>
 #include <boolean.h>
 #include <string.h>
-#include "file/file_path.h"
+#include <file/file_path.h>
+#include <streams/file_stream.h>
 #include "zlib.h"
 
 #include "fileformat.h"
 #include "unzip.h"
+
+/* forward declarations */
+RFILE* rfopen(const char *path, const char *mode);
+int rfclose(RFILE* stream);
+int64_t rftell(RFILE* stream);
+int rferror(RFILE* stream);
+int64_t rfread(void* buffer,
+   size_t elem_size, size_t elem_count, RFILE* stream);
+int64_t rfseek(RFILE* stream, int64_t offset, int origin);
+int rfeof(RFILE* stream);
 
 static const char *gme_allowed_exts[] = {
     "ay","AY",
@@ -164,7 +175,7 @@ static bool get_files_from_zip(const char *path,
 bool get_file_data(const char *path,file_data ***dest_files, int *dest_numfiles)
 {
    //local variables
-   FILE *fp;
+   RFILE *fp;
    file_data *fd;
    file_data **files;
    //get file name and extension
@@ -173,18 +184,16 @@ bool get_file_data(const char *path,file_data ***dest_files, int *dest_numfiles)
    //get file data
    if(strcmp(ext,"zip")==0)
       return get_files_from_zip(path,dest_files,dest_numfiles);
-   if (!(fp = fopen(path,"rb")))
+   if (!(fp = rfopen(path,"rb")))
       return false;
    files = malloc(sizeof(file_data*));
    fd    = malloc(sizeof(file_data));
    //get file length
-   fseek (fp,0,SEEK_END);
-   fd->length = ftell(fp);
-   rewind(fp);
+   fd->length = filestream_get_size(fp);
    //get file data
    fd->data = malloc(sizeof(char)*fd->length);
-   fread(fd->data,1,fd->length,fp);
-   fclose(fp);
+   rfread(fd->data,1,fd->length,fp);
+   rfclose(fp);
    fd->name = calloc(strlen(bname)+1,sizeof(char));
    strcpy(fd->name,bname);
    if(strcmp(ext,"vgz")==0)

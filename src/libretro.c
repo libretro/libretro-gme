@@ -4,6 +4,7 @@
 
 #include <libretro.h>
 #include <retro_miscellaneous.h>
+#include <streams/file_stream.h>
 
 #include "graphics.h"
 #include "player.h"
@@ -26,7 +27,18 @@ static retro_audio_sample_batch_t audio_batch_cb;
 void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
 void retro_set_input_poll(retro_input_poll_t cb) { input_poll_cb = cb; }
 void retro_set_input_state(retro_input_state_t cb) { input_state_cb = cb; }
-void retro_set_environment(retro_environment_t cb) { environ_cb = cb; }
+
+void retro_set_environment(retro_environment_t cb)
+{
+   struct retro_vfs_interface_info vfs_iface_info;
+   environ_cb = cb;
+
+   vfs_iface_info.required_interface_version = 1;
+   vfs_iface_info.iface                      = NULL;
+   if (cb(RETRO_ENVIRONMENT_GET_VFS_INTERFACE, &vfs_iface_info))
+      filestream_vfs_init(&vfs_iface_info);
+}
+
 void retro_set_audio_sample(retro_audio_sample_t cb) { audio_cb = cb; }
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_cb = cb; }
 

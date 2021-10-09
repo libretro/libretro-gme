@@ -78,10 +78,21 @@ SOURCES_C    := $(CORE_DIR)/src/libretro.c \
 		$(DEPS_DIR)/zlib-1.2.8/gzlib.c \
 		$(DEPS_DIR)/zlib-1.2.8/gzread.c \
 		$(DEPS_DIR)/zlib-1.2.8/gzwrite.c \
-		$(DEPS_DIR)/zlib-1.2.8/trees.c \
-		$(DEPS_DIR)/libretro-common/compat/compat_snprintf.c \
-		$(DEPS_DIR)/libretro-common/compat/compat_posix_string.c \
-		$(DEPS_DIR)/libretro-common/compat/compat_strcasestr.c \
-		$(DEPS_DIR)/libretro-common/compat/compat_strl.c \
-		$(DEPS_DIR)/libretro-common/file/file_path.c \
-		$(DEPS_DIR)/libretro-common/string/stdstring.c
+		$(DEPS_DIR)/zlib-1.2.8/trees.c
+
+ifneq ($(STATIC_LINKING), 1)
+SOURCES_C += \
+	     $(LIBRETRO_COMM_DIR)/compat/compat_strcasestr.c \
+	     $(LIBRETRO_COMM_DIR)/encodings/encoding_utf.c \
+	     $(LIBRETRO_COMM_DIR)/compat/compat_snprintf.c \
+	     $(LIBRETRO_COMM_DIR)/compat/compat_strl.c \
+	     $(LIBRETRO_COMM_DIR)/compat/compat_posix_string.c \
+	     $(LIBRETRO_COMM_DIR)/compat/fopen_utf8.c \
+	     $(LIBRETRO_COMM_DIR)/streams/file_stream.c \
+	     $(LIBRETRO_COMM_DIR)/streams/file_stream_transforms.c \
+	     $(LIBRETRO_COMM_DIR)/string/stdstring.c \
+	     $(LIBRETRO_COMM_DIR)/vfs/vfs_implementation.c \
+	     $(LIBRETRO_COMM_DIR)/file/file_path.c \
+	     $(LIBRETRO_COMM_DIR)/file/file_path_io.c \
+	     $(LIBRETRO_COMM_DIR)/time/rtime.c
+endif
