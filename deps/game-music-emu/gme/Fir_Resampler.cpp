@@ -4,7 +4,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 
 /* Copyright (C) 2004-2006 Shay Green. This module is free software; you

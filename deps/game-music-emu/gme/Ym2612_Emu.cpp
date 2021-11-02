@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <stdio.h>
 #include <math.h>
 
 /* Copyright (C) 2002 Stéphane Dallongeville (gens AT consolemul.com) */

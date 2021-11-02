@@ -4,7 +4,6 @@
 
 #include "blargg_endian.h"
 #include <string.h>
-#include <stdio.h>
 
 #if !NSF_EMU_APU_ONLY
 	#include "Nes_Namco_Apu.h"

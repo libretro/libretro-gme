@@ -5,7 +5,6 @@
 #include "blargg_endian.h"
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
 #include <streams/file_stream.h>
 
 /* Copyright (C) 2005-2006 Shay Green. This module is free software; you
