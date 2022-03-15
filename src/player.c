@@ -52,14 +52,14 @@ void start_track(int tracknr)
    track = plist->tracks[tracknr];
    if(track)
    {
-      //change emu if file changes
-      if(track->file_id != prev_fileid)
+      //change emu regardless of whether file changes
+      //if(track->file_id != prev_fileid)
       {
          is_playing_ = false;
          file = plist->files[track->file_id];
          prev_fileid = track->file_id;
          if (emu)
-            gme_delete (emu);		
+            gme_delete (emu);
          emu = gme_new_emu(file->file_type,sample_rate_);
          gme_load_data(emu,file->data,file->length);
          is_playing_ = true;
