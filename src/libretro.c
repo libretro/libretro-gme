@@ -146,7 +146,7 @@ void retro_deinit(void)
 // Reset gme
 void retro_reset(void)
 {
-
+    start_track(0);
 }
 
 // Run a single frame
@@ -180,7 +180,7 @@ void retro_run(void)
    draw_ui();
    video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
    //audio handling
-   audio_batch_cb(play(),1470);
+   audio_batch_cb(play(),735);
 }
 
 // File Loading

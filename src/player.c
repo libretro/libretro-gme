@@ -86,7 +86,7 @@ short *play(void)
             is_playing_ = false;
       }
       else
-         gme_play( emu, 2048, audio_buffer );
+         gme_play( emu, 1470, audio_buffer );
    }
    else
       memset(audio_buffer,0,8192 * sizeof(short));
