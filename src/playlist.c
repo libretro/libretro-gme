@@ -184,6 +184,17 @@ bool get_track_data(Music_Emu* emu, int fileid, int trackid, char *filename,gme_
       gtd->track_name = calloc(strlen(ti->song)+1,sizeof(char));
       strcpy(gtd->track_name, ti->song);
    }
+   //author
+   if(strcmp(ti->author,"") == 0)
+   {
+      gtd->author = calloc(2,sizeof(char));
+      sprintf(gtd->track_name, " ");
+   }
+   else
+   {
+      gtd->author = calloc(strlen(ti->author)+1,sizeof(char));
+      strcpy(gtd->author, ti->author);
+   }
    gme_free_info(ti);
    *dest_gtd = gtd;
    return true;

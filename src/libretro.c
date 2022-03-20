@@ -91,7 +91,6 @@ static void draw_ui(void)
    unsigned short lc = 0;
    char *message = malloc(100);
    //lines
-
    draw_box(framebuffer,gme_white,ob);
    draw_line(framebuffer,gme_gray,ob.x0,ob.y0,ib.x0,ib.y0); //top-left corner
    draw_line(framebuffer,gme_gray,ob.x1,ob.y0,ib.x1,ib.y0); //top-right corner
@@ -111,14 +110,15 @@ static void draw_ui(void)
             draw_line(framebuffer,lc,ob.x0+1+offset,ob.y1-offset,ob.x1-1-offset,ob.y1-offset); //top
       }
    }
+   draw_string(framebuffer,gme_white,get_num_voices(message),30, 30,get_track_elapsed_frames());
    //text
-
    maxlen = draw_text_centered(get_game_name(message),gme_red,centery-20,maxlen);
    maxlen = draw_text_centered(get_track_count(message),gme_yellow,centery-10,maxlen);
    maxlen = draw_text_centered(get_song_name(message),gme_blue,centery,maxlen);
-   maxlen = draw_text_centered(get_track_position(message),gme_white,centery+10,maxlen);
+   maxlen = draw_text_centered(get_author(message),gme_green,centery+10,maxlen);
+   maxlen = draw_text_centered(get_track_position(message),gme_white,centery+20,maxlen);
    maxlen = MIN(maxlen,framebuffer->width-40);
-   box tb = {centerx-(maxlen/2),centery-22,centerx+(maxlen/2),centery+22};
+   box tb = {centerx-(maxlen/2)-2,centery-22,centerx+(maxlen/2)+2,centery+30};
    draw_box(framebuffer,gme_violet,tb);
    free(message);
 }

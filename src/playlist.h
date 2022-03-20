@@ -17,7 +17,8 @@ typedef struct {
 	int track_id;
 	int track_length;
 	char* game_name;
-	char* track_name;	
+	char* track_name;
+	char *author;	
 } gme_track_data;
 		
 typedef struct {

@@ -123,6 +123,18 @@ char *get_song_name(char *buf)
 	return buf;
 }
 
+char *get_author(char *buf)
+{
+   sprintf(buf, "%s", track->author);
+   return buf;
+}
+
+char *get_num_voices(char *buf)
+{
+   sprintf(buf, "Num voices: %i", gme_voice_count(emu));
+   return buf;
+}
+
 char *get_track_position(char *buf)
 {
    long seconds         = track->track_length / 1000;
