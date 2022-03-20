@@ -1,22 +1,23 @@
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
 #include <libretro.h>
 #include <retro_miscellaneous.h>
+#include <streams/file_stream.h>
 
 #include "graphics.h"
 #include "player.h"
-#include "log.h"
 
 // Static globals
-static surface *framebuffer = NULL;;
+static surface *framebuffer = NULL;
 static uint16_t previnput = 0;
 static float last_aspect = 0.0f;
 static float last_scale = 0.0f;
 static bool display_rainbow;
 // Callbacks
+
+retro_log_printf_t log_cb;
 
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t input_poll_cb;
@@ -28,6 +29,26 @@ static retro_audio_sample_batch_t audio_batch_cb;
 void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
 void retro_set_input_poll(retro_input_poll_t cb) { input_poll_cb = cb; }
 void retro_set_input_state(retro_input_state_t cb) { input_state_cb = cb; }
+
+
+void retro_set_environment(retro_environment_t cb)
+{
+   struct retro_vfs_interface_info vfs_iface_info;
+   environ_cb = cb;
+
+   vfs_iface_info.required_interface_version = 1;
+   vfs_iface_info.iface                      = NULL;
+   if (cb(RETRO_ENVIRONMENT_GET_VFS_INTERFACE, &vfs_iface_info))
+      filestream_vfs_init(&vfs_iface_info);
+   static const struct retro_variable vars[] = {
+      { "gme_aspect", "Aspect Ratio; 16:9|4:3"},
+      { "gme_scale", "Scale; 1x|2x"},
+      { "display_rainbow", "Display Rainbow Animation; false|true"},
+      { NULL, NULL},
+   };
+   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
+}
+
 void retro_set_audio_sample(retro_audio_sample_t cb) { audio_cb = cb; }
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_cb = cb; }
 
@@ -47,6 +68,7 @@ size_t retro_get_memory_size(unsigned id){ return 0; }
 // Cheats
 void retro_cheat_reset(void) {}
 void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
+
 
 static int draw_text_centered(char* text,unsigned short color, int y, int maxlen)
 {
@@ -69,6 +91,7 @@ static void draw_ui(void)
    unsigned short lc = 0;
    char *message = malloc(100);
    //lines
+
    draw_box(framebuffer,gme_white,ob);
    draw_line(framebuffer,gme_gray,ob.x0,ob.y0,ib.x0,ib.y0); //top-left corner
    draw_line(framebuffer,gme_gray,ob.x1,ob.y0,ib.x1,ib.y0); //top-right corner
@@ -89,6 +112,7 @@ static void draw_ui(void)
       }
    }
    //text
+
    maxlen = draw_text_centered(get_game_name(message),gme_red,centery-20,maxlen);
    maxlen = draw_text_centered(get_track_count(message),gme_yellow,centery-10,maxlen);
    maxlen = draw_text_centered(get_song_name(message),gme_blue,centery,maxlen);
@@ -99,9 +123,6 @@ static void draw_ui(void)
    free(message);
 }
 
-void handle_error( const char* error );
-void handle_info( const char* info);
-
 /*
  * Tell libretro about this core, it's name, version and which rom files it supports.
  */
@@ -110,21 +131,9 @@ void retro_get_system_info(struct retro_system_info *info)
    memset(info, 0, sizeof(*info));
    info->library_name = "Game Music Emulator";
    info->library_version = "v0.6.1";
-   info->need_fullpath = false;
+   info->need_fullpath = true;
    info->valid_extensions = "ay|gbs|gym|hes|kss|nsf|nsfe|sap|spc|vgm|vgz|zip";
    info->block_extract = true;
-}
-
-void retro_set_environment(retro_environment_t cb) 
-{ 
-   environ_cb = cb;
-   static const struct retro_variable vars[] = {
-      { "gme_aspect", "Aspect Ratio; 16:9|4:3"},
-      { "gme_scale", "Scale; 1x|2x"},
-      { "display_rainbow", "Display Rainbow Animation; false|true"},
-      { NULL, NULL},
-   };
-   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
 }
 
 /*
@@ -191,21 +200,29 @@ void retro_init(void)
 {
    unsigned level = 0;
    /* set up some logging */
-   init_log(environ_cb);
+   struct retro_log_callback log;
+   if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
+      log_cb = log.log;
+   else
+      log_cb = NULL;
+
    // the performance level is guide to frontend to give an idea of how intensive this core is to run
    environ_cb(RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL, &level);
+   framebuffer = create_surface(320,240,2);
 }
 
 // End of retrolib
 void retro_deinit(void)
 {
-   free(framebuffer);
+   if (framebuffer)
+      free_surface(framebuffer);
+   framebuffer = NULL;
 }
 
 // Reset gme
 void retro_reset(void)
 {
-
+    start_track(0);
 }
 
 // Run a single frame
@@ -215,7 +232,6 @@ void retro_run(void)
    uint16_t realinput = 0;
    int i;
    bool updated = false;
-   char str[256];
    // input handling
    input_poll_cb();
    for(i=0;i<16;i++)
@@ -249,10 +265,7 @@ void retro_run(void)
       retro_get_system_av_info(&info);
       if((aspect != last_aspect && aspect != 0.0f) || (scale != last_scale && scale != 0.0f))
       {
-         bool ret;
-         ret = environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info.geometry);
-         sprintf(str,"SET_SYSTEM_AV_INFO/SET_GEOMETRY = %u.\n", ret);
-         handle_info(str);
+		environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &info.geometry);
       }
    }
 }
@@ -260,16 +273,9 @@ void retro_run(void)
 // File Loading
 bool retro_load_game(const struct retro_game_info *info)
 {
-   long sample_rate = 44100;
-
-   // ensure there is ROM data
-   if (!info || !info->data)
-      return false;
-
-   if(open_file(info->path,sample_rate))
+   if (info && open_file(info->path, 44100))
       return true;
-   else
-      return false;
+   return false;
 }
 
 bool retro_load_game_special(unsigned game_type, const struct retro_game_info *info, size_t num_info)
@@ -281,5 +287,3 @@ void retro_unload_game(void)
 {
    close_file();
 }
-
-

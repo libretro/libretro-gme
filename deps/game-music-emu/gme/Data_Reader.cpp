@@ -5,7 +5,7 @@
 #include "blargg_endian.h"
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
+#include <streams/file_stream.h>
 
 /* Copyright (C) 2005-2006 Shay Green. This module is free software; you
 can redistribute it and/or modify it under the terms of the GNU Lesser
@@ -21,6 +21,20 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 #include "blargg_source.h"
 
 const char Data_Reader::eof_error [] = "Unexpected end of file";
+
+extern "C" {
+
+/* forward declarations */
+RFILE* rfopen(const char *path, const char *mode);
+int rfclose(RFILE* stream);
+int64_t rftell(RFILE* stream);
+int rferror(RFILE* stream);
+int64_t rfread(void* buffer,
+   size_t elem_size, size_t elem_count, RFILE* stream);
+int64_t rfseek(RFILE* stream, int64_t offset, int origin);
+int rfeof(RFILE* stream);
+
+}
 
 blargg_err_t Data_Reader::read( void* p, long s )
 {
@@ -193,40 +207,41 @@ Std_File_Reader::~Std_File_Reader() { close(); }
 
 blargg_err_t Std_File_Reader::open( const char* path )
 {
-	file_ = fopen( path, "rb" );
-	if ( !file_ )
-		return "Couldn't open file";
-	return 0;
+   file_ = rfopen( path, "rb" );
+   if ( !file_ )
+      return "Couldn't open file";
+   return 0;
 }
 
 long Std_File_Reader::size() const
 {
-	long pos = tell();
-	fseek( (FILE*) file_, 0, SEEK_END );
-	long result = tell();
-	fseek( (FILE*) file_, pos, SEEK_SET );
-	return result;
+   int64_t result;
+   int64_t pos = rftell((RFILE*)file_);
+   rfseek( (RFILE*) file_, 0, SEEK_END );
+   result      = rftell((RFILE*)file_);
+   rfseek( (RFILE*) file_, pos, SEEK_SET );
+   return result;
 }
 
 long Std_File_Reader::read_avail( void* p, long s )
 {
-	return fread( p, 1, s, (FILE*) file_ );
+   return rfread( p, 1, s, (RFILE*) file_ );
 }
 
 blargg_err_t Std_File_Reader::read( void* p, long s )
 {
-	if ( s == (long) fread( p, 1, s, (FILE*) file_ ) )
-		return 0;
-	if ( feof( (FILE*) file_ ) )
-		return eof_error;
-	return "Couldn't read from file";
+   if ( s == (long)rfread( p, 1, s, (RFILE*) file_ ) )
+      return 0;
+   if ( rfeof( (RFILE*) file_ ) )
+      return eof_error;
+   return "Couldn't read from file";
 }
 
-long Std_File_Reader::tell() const { return ftell( (FILE*) file_ ); }
+long Std_File_Reader::tell() const { return (long)rftell( (RFILE*) file_ ); }
 
 blargg_err_t Std_File_Reader::seek( long n )
 {
-	if ( !fseek( (FILE*) file_, n, SEEK_SET ) )
+	if ( !rfseek( (RFILE*) file_, n, SEEK_SET ) )
 		return 0;
 	if ( n > size() )
 		return eof_error;
@@ -237,7 +252,7 @@ void Std_File_Reader::close()
 {
 	if ( file_ )
 	{
-		fclose( (FILE*) file_ );
+		rfclose( (RFILE*) file_ );
 		file_ = 0;
 	}
 }
@@ -250,24 +265,24 @@ void Std_File_Reader::close()
 
 static const char* get_gzip_eof( const char* path, long* eof )
 {
-	FILE* file = fopen( path, "rb" );
+	unsigned char buf [4];
+	RFILE* file = rfopen( path, "rb" );
 	if ( !file )
 		return "Couldn't open file";
 	
-	unsigned char buf [4];
-	if ( fread( buf, 2, 1, file ) > 0 && buf [0] == 0x1F && buf [1] == 0x8B )
+	if ( rfread( buf, 2, 1, file ) > 0 && buf [0] == 0x1F && buf [1] == 0x8B )
 	{
-		fseek( file, -4, SEEK_END );
-		fread( buf, 4, 1, file );
+		rfseek( file, -4, SEEK_END );
+		rfread( buf, 4, 1, file );
 		*eof = get_le32( buf );
 	}
 	else
 	{
-		fseek( file, 0, SEEK_END );
-		*eof = ftell( file );
+		rfseek( file, 0, SEEK_END );
+		*eof = (long)rftell( file );
 	}
-	const char* err = (ferror( file ) || feof( file )) ? "Couldn't get file size" : 0;
-	fclose( file );
+	const char* err = (rferror( file ) || rfeof( file )) ? "Couldn't get file size" : 0;
+	rfclose( file );
 	return err;
 }
 

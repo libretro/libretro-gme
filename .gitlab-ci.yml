@@ -21,6 +21,18 @@ include:
   - project: 'libretro-infrastructure/ci-templates'
     file: '/windows-i686-mingw.yml'
 
+  # Windows msvc10 64-bit
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/windows-x64-msvc10-msys2.yml'
+
+  # Windows msvc10 32-bit
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/windows-i686-msvc10-msys2.yml'
+
+  # Windows msvc05 32-bit
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/windows-i686-msvc05-msys2.yml'
+
   # Linux 64-bit
   - project: 'libretro-infrastructure/ci-templates'
     file: '/linux-x64.yml'
@@ -42,7 +54,11 @@ include:
   - project: 'libretro-infrastructure/ci-templates'
     file: '/android-jni.yml'
 
-  # iOS 9
+  # iOS
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/ios-arm64.yml'
+
+  # iOS (armv7)
   - project: 'libretro-infrastructure/ci-templates'
     file: '/ios9.yml'
 
@@ -76,6 +92,10 @@ include:
   - project: 'libretro-infrastructure/ci-templates'
     file: '/libnx-static.yml'
 
+  # tvOS (AppleTV)
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/tvos-arm64.yml'
+
   #################################### MISC ##################################
   # Emscripten
   - project: 'libretro-infrastructure/ci-templates'
@@ -102,6 +122,24 @@ libretro-build-windows-x64:
 libretro-build-windows-i686:
   extends:
     - .libretro-windows-i686-mingw-make-default
+    - .core-defs
+
+# Windows msvc10 64-bit
+libretro-build-windows-msvc10-x64:
+  extends:
+    - .libretro-windows-x64-msvc10-msys2-make-default
+    - .core-defs
+
+# Windows msvc10 32-bit
+libretro-build-windows-msvc10-i686:
+  extends:
+    - .libretro-windows-i686-msvc10-msys2-make-default
+    - .core-defs
+
+# Windows msvc05 32-bit
+libretro-build-windows-msvc05-i686:
+  extends:
+    - .libretro-windows-i686-msvc05-msys2-make-default
     - .core-defs
 
 # Linux 64-bit
@@ -153,10 +191,22 @@ android-x86:
     - .libretro-android-jni-x86
     - .core-defs
 
-# iOS 9
-libretro-build-ios-9:
+# iOS
+libretro-build-ios-arm64:
+  extends:
+    - .libretro-ios-arm64-make-default
+    - .core-defs
+
+# iOS (armv7) [iOS 9 and up]
+libretro-build-ios9:
   extends:
     - .libretro-ios9-make-default
+    - .core-defs
+    
+# tvOS
+libretro-build-tvos-arm64:
+  extends:
+    - .libretro-tvos-arm64-make-default
     - .core-defs
 
 ################################### CONSOLES #################################
