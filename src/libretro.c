@@ -256,7 +256,7 @@ void retro_run(void)
    draw_ui();
    video_cb(framebuffer->pixel_data, framebuffer->width, framebuffer->height, framebuffer->bytes_per_pixel * framebuffer->width);
    //audio handling
-   audio_batch_cb(play(),1470);
+   audio_batch_cb(play(),735);
    if(environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE,&updated) && updated)
    {
       float aspect = last_aspect;
