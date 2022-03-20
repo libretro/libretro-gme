@@ -33,6 +33,10 @@ surface *create_surface(unsigned int width, unsigned int height, unsigned int bp
    newsurf->pixel_data = malloc(width*height*bpp);
 
    if (!newsurf->pixel_data)
+   {
+      free(newsurf);
+      return NULL;
+   }
 
    memset(newsurf->pixel_data,0,width*height*bpp);
    newsurf->width           = width;
@@ -164,6 +168,7 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
    int modulo = 0;
    int frame_delay = 2;
    int msglen = strlen(text);
+
    surface *clipped_surface = NULL;
    surface *temp_surface    = create_surface((msglen*8),8,2);
    
@@ -171,7 +176,6 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
    {
       for(x=0;x<msglen;x++)
          draw_letter(temp_surface,color,text[x],(x*8),0);
-
       if((msglen*8)>(surf->width-40))
       {
          delta    = (msglen*8) -(surf->width-40);
@@ -189,7 +193,6 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
       }
       free_surface(temp_surface);
    }
-
 }
 
 int get_string_length(char* text)
