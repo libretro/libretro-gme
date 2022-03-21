@@ -18,6 +18,10 @@ void next_track(void);
 
 void prev_track(void);
 
+bool is_voice_muted(int index);
+
+void mute_voice(int index);
+
 char *get_game_name(char *buf);
 
 char *get_track_count(char *buf);
@@ -26,7 +30,9 @@ char *get_song_name(char *buf);
 
 char *get_author(char *buf);
 
-char *get_num_voices(char *buf);
+int get_num_voices(void);
+
+char *get_voice_name(int index);
 
 char *get_track_position(char *buf);
 

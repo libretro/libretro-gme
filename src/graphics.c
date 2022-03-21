@@ -54,22 +54,22 @@ void free_surface(surface *surf)
    }
 }
 
-surface *clip_surface(surface *src_surf, int x_src, int y_src, int x0, int y0, int x1, int y1)
+surface *clip_surface(surface *src_surf, int x_src, int y_src, box clip_box)
 {
    int wx0,wy0,wx1,wy1; //world coord
    int lx,ly,lw,lh; //local coord
    surface *clipped_surf = NULL;
    //check if completely out of bounds
-   if(      (x_src+src_surf->width) <x0 
-         || (x_src > x1) 
-         || (y_src+src_surf->height) < y0 
-         || (y_src > y1))
+   if(      (x_src+src_surf->width) <clip_box.x0 
+         || (x_src > clip_box.x1) 
+         || (y_src+src_surf->height) < clip_box.y0 
+         || (y_src > clip_box.y1))
       return clipped_surf;
 
-   wx0          = MAX(x_src,x0);
-   wy0          = MAX(y_src,y0);
-   wx1          = MIN(x_src+src_surf->width,x1);
-   wy1          = MIN(y_src+src_surf->height,y1);
+   wx0          = MAX(x_src,clip_box.x0);
+   wy0          = MAX(y_src,clip_box.y0);
+   wx1          = MIN(x_src+src_surf->width,clip_box.x1);
+   wy1          = MIN(y_src+src_surf->height,clip_box.y1);
    lx           = wx0 - x_src;
    ly           = wy0 - y_src;
    lw           = wx1 - wx0;
@@ -159,7 +159,7 @@ void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, in
    }		
 }
 
-void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter)
+void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter, box clip_box)
 {
    int x;
    int x_offset = 0;
@@ -185,7 +185,7 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
          x_offset = MIN(x_offset,delta); //clamp right to add delay
       }
 
-      clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y,21,21,(surf->width-21),(surf->height-21));
+      clipped_surface = clip_surface(temp_surface,pos_x-x_offset,pos_y, clip_box);
       if(clipped_surface)
       {
          copy_surface(clipped_surface,surf,0,0,pos_x,pos_y,clipped_surface->width,clipped_surface->height);

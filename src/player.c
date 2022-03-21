@@ -17,6 +17,7 @@ static short audio_buffer[8192];
 static bool is_playing_;
 static long sample_rate_;
 static int current_track;
+static unsigned char mute_mask;
 
 bool is_emu_loaded(void)
 {
@@ -48,6 +49,7 @@ void close_file(void)
 void start_track(int tracknr)
 {
    memset(audio_buffer,0,8192 * sizeof(short));
+   mute_mask = 0;
    current_track = tracknr;
    track = plist->tracks[tracknr];
    if(track)
@@ -105,6 +107,24 @@ void prev_track(void)
       start_track(--current_track);
 }
 
+bool is_voice_muted(int index)
+{
+   int bit = 1 << index;
+   return (mute_mask & bit) != 0;
+}
+
+void mute_voice(int index)
+{
+   if(index<gme_voice_count(emu))
+   {
+      bool mute = !is_voice_muted(index);
+      gme_mute_voice(emu,index, mute);
+      mute_mask |= (1 << index);
+      if(!mute)
+         mute_mask ^= (1 << index);
+   }
+}
+
 char *get_game_name(char *buf)
 {
 	sprintf(buf, "%s",track->game_name);
@@ -129,10 +149,17 @@ char *get_author(char *buf)
    return buf;
 }
 
-char *get_num_voices(char *buf)
+int get_num_voices(void)
 {
-   sprintf(buf, "Num voices: %i", gme_voice_count(emu));
-   return buf;
+   return gme_voice_count(emu);
+}
+
+char *get_voice_name(int index)
+{
+   if(index<gme_voice_count(emu))
+      return (char*)gme_voice_name(emu, index);
+   else
+      return "";
 }
 
 char *get_track_position(char *buf)

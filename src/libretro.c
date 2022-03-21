@@ -14,7 +14,8 @@ static surface *framebuffer = NULL;
 static uint16_t previnput = 0;
 static float last_aspect = 0.0f;
 static float last_scale = 0.0f;
-static bool display_rainbow;
+static int selected_voice = 0;
+static bool show_help = true;
 // Callbacks
 
 retro_log_printf_t log_cb;
@@ -43,7 +44,7 @@ void retro_set_environment(retro_environment_t cb)
    static const struct retro_variable vars[] = {
       { "gme_aspect", "Aspect Ratio; 16:9|4:3"},
       { "gme_scale", "Scale; 1x|2x"},
-      { "display_rainbow", "Display Rainbow Animation; false|true"},
+      { "gme_showhelp", "Show Help; true|false"},
       { NULL, NULL},
    };
    cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
@@ -72,23 +73,21 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code) {}
 
 static int draw_text_centered(char* text,unsigned short color, int y, int maxlen)
 {
+   box clipbox = {21,21,(framebuffer->width-21),(framebuffer->height-21)};
    int centerx = framebuffer->width/2;
    int msglen = get_string_length(text);
-   draw_string(framebuffer,color,text,MAX(centerx-(msglen/2),21), y,get_track_elapsed_frames());
+   draw_string(framebuffer,color,text,MAX(centerx-(msglen/2),21), y,get_track_elapsed_frames(), clipbox);
    return MAX(msglen,maxlen);
 }
 
 // Custom functions
 static void draw_ui(void)
 {
-   int offset;
    int maxlen    = 0;
    int centerx = framebuffer->width/2;
    int centery = framebuffer->height/2;
    box ob = {5,5,framebuffer->width-5,framebuffer->height-5};
    box ib = {20,20,framebuffer->width-20,framebuffer->height-20};
-   char colorstart = 0;
-   unsigned short lc = 0;
    char *message = malloc(100);
    //lines
    draw_box(framebuffer,gme_white,ob);
@@ -97,28 +96,36 @@ static void draw_ui(void)
    draw_line(framebuffer,gme_gray,ob.x0,ob.y1,ib.x0,ib.y1); //bottom-left corner
    draw_line(framebuffer,gme_gray,ob.x1,ob.y1,ib.x1,ib.y1);
    draw_box(framebuffer,gme_gray,ib);
-   //display rainbow if variable is set
-   if(display_rainbow)
+   //voice boxes
+   int voicenr;
+   int box_width = ((framebuffer->width - 50)>>2);
+   int box_height = box_width >> 1;
+   for(voicenr=0;voicenr<get_num_voices();voicenr++)
    {
-      colorstart = (get_track_elapsed_frames() % 30) >> 2;
-      for(offset=1;offset<15;offset++)
-      {
-            lc = gme_rainbow7[(colorstart + (offset >> 1)) % 7];
-            draw_line(framebuffer,lc,ob.x0+offset,ob.y0+1+offset,ob.x0+offset,ob.y1-1-offset); //left
-            draw_line(framebuffer,lc,ob.x0+1+offset,ob.y0+offset,ob.x1-1-offset,ob.y0+offset); //top
-            draw_line(framebuffer,lc,ob.x1-offset,ob.y0+1+offset,ob.x1-offset,ob.y1-1-offset); //right
-            draw_line(framebuffer,lc,ob.x0+1+offset,ob.y1-offset,ob.x1-1-offset,ob.y1-offset); //top
-      }
+      int box_x = 25+(box_width*(voicenr%4));
+      int box_y = 22+(box_height*(voicenr>>2));
+      unsigned short vc = voicenr == selected_voice ? gme_red : gme_white;
+      box vb = {box_x, box_y, box_x + box_width -1 , box_y + box_height -1};
+      draw_box(framebuffer,vc,vb);
+      draw_string(framebuffer,vc, get_voice_name(voicenr),box_x+2, box_y+2, get_track_elapsed_frames(), vb);
+      if(is_voice_muted(voicenr))
+         draw_string(framebuffer, gme_red, "muted", box_x+4, box_y+10, get_track_elapsed_frames(), vb);
    }
-   draw_string(framebuffer,gme_white,get_num_voices(message),30, 30,get_track_elapsed_frames());
    //text
-   maxlen = draw_text_centered(get_game_name(message),gme_red,centery-20,maxlen);
-   maxlen = draw_text_centered(get_track_count(message),gme_yellow,centery-10,maxlen);
-   maxlen = draw_text_centered(get_song_name(message),gme_blue,centery,maxlen);
-   maxlen = draw_text_centered(get_author(message),gme_green,centery+10,maxlen);
-   maxlen = draw_text_centered(get_track_position(message),gme_white,centery+20,maxlen);
+   if(show_help)
+   {
+      box help_box_top     = {20,7, framebuffer->width-20, 19};
+      box help_box_bottom  = {20,framebuffer->height-20, framebuffer->width-20, framebuffer->height};
+      draw_string(framebuffer, gme_white, "Left/Right: Voice A: Mute/Unmute", 22 ,10, get_track_elapsed_frames(),help_box_top);
+      draw_string(framebuffer, gme_white, "L: Prev R: Next Start: Play/Pause", 22 ,framebuffer->height-18, get_track_elapsed_frames(),help_box_bottom);
+   }
+   maxlen = draw_text_centered(get_game_name(message),gme_red,centery,maxlen);
+   maxlen = draw_text_centered(get_track_count(message),gme_yellow,centery+10,maxlen);
+   maxlen = draw_text_centered(get_song_name(message),gme_blue,centery+20,maxlen);
+   maxlen = draw_text_centered(get_author(message),gme_green,centery+30,maxlen);
+   maxlen = draw_text_centered(get_track_position(message),gme_white,centery+40,maxlen);
    maxlen = MIN(maxlen,framebuffer->width-40);
-   box tb = {centerx-(maxlen/2)-2,centery-22,centerx+(maxlen/2)+2,centery+30};
+   box tb = {centerx-(maxlen/2)-1,centery-2,centerx+(maxlen/2)+2,centery+50};
    draw_box(framebuffer,gme_violet,tb);
    free(message);
 }
@@ -173,13 +180,13 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
          height = 180 * scale;
       }
    }
-   var.key = "display_rainbow";
-   if(environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
+   var.key = "gme_showhelp";
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
-      if(!strcmp(var.value,"true"))
-         display_rainbow = true;
-      else
-         display_rainbow = false;
+      if (!strcmp(var.value, "true"))
+         show_help = true;
+      else if (!strcmp(var.value, "false"))
+         show_help = false;
    }
    int pixel_format = RETRO_PIXEL_FORMAT_RGB565;
    memset(info, 0, sizeof(*info));
@@ -250,6 +257,15 @@ void retro_run(void)
 
    if(input & (1<<RETRO_DEVICE_ID_JOYPAD_START))
       play_pause();
+
+   if(input & (1<<RETRO_DEVICE_ID_JOYPAD_B))
+      mute_voice(selected_voice);
+   
+   if(input & (1<<RETRO_DEVICE_ID_JOYPAD_LEFT))
+      selected_voice = (selected_voice-1) % get_num_voices();
+
+   if(input & (1<<RETRO_DEVICE_ID_JOYPAD_RIGHT))
+      selected_voice = (selected_voice+1) % get_num_voices();
 
    //graphic handling
    memset(framebuffer->pixel_data,0,framebuffer->bytes_per_pixel * framebuffer->width * framebuffer->height);

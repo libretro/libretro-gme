@@ -39,12 +39,13 @@ bool is_font_pixel(unsigned char letter, int x, int y);
 unsigned short get_color(char r, char g, char b);
 surface *create_surface(unsigned int width, unsigned int height, unsigned int bpp);
 void free_surface(surface *surf);
+surface *clip_surface(surface *src_surf, int x_src, int y_src, box clip_box);
 void copy_surface(surface *src_surf, surface *dst_surf, int x_src, int y_src, int x_dst, int y_dst, int w, int h);
 void draw_line(surface *surf, unsigned short color, int start_x, int start_y, int end_x, int end_y);
 void draw_box(surface *surf, unsigned short color, box b);
 void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w, int h);
 void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, int pos_y);
-void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter);
+void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int pos_y, unsigned int framecounter, box clip_box);
 int get_string_length(char* text);
 
 #endif
