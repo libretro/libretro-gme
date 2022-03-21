@@ -19,17 +19,17 @@ int64_t rfseek(RFILE* stream, int64_t offset, int origin);
 int rfeof(RFILE* stream);
 
 static const char *gme_allowed_exts[] = {
-    "ay","AY",
-    "gbs","GBS",
-    "gym","GYM",
-    "hes","HES",
-    "kss","KSS",
-    "nsf","NSF",
-    "nsfe","NSFE",
-    "sap","SAP",
-    "spc","SPC",
-    "vgm","VGM",
-    "vgz","VGZ"
+   "ay","AY",
+   "gbs","GBS",
+   "gym","GYM",
+   "hes","HES",
+   "kss","KSS",
+   "nsf","NSF",
+   "nsfe","NSFE",
+   "sap","SAP",
+   "spc","SPC",
+   "vgm","VGM",
+   "vgz","VGZ"
 };
 
 static bool is_gme_allowed_ext(char *ext)

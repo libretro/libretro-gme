@@ -50,7 +50,7 @@ void free_surface(surface *surf)
    if (surf)
    {
       free(surf->pixel_data);
-      free(surf);		
+      free(surf);
    }
 }
 
@@ -141,7 +141,7 @@ void draw_shape(surface *surf, unsigned short color, int pos_x, int pos_y, int w
    {
       for(x=pos_x;x<(pos_x+w);x++)
          set_pixel(surf,x,y,color);
-   }	
+   }
 }
 
 void draw_letter(surface *surf, unsigned short color, char letter, int pos_x, int pos_y)

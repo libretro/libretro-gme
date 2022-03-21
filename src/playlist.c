@@ -37,7 +37,7 @@ bool get_playlist(const char *path, playlist **dest_pl)
             if(get_track_data(temp_emu,i,j,gfd->name,
                      &(pl->tracks[position])))
                position++;
-         }				
+         }
 
          gme_delete(temp_emu);
          temp_emu = NULL;
@@ -200,7 +200,7 @@ bool get_track_data(Music_Emu* emu, int fileid, int trackid, char *filename,gme_
    return true;
 }
 
-bool cleanup_playlist(playlist *playlist)	
+bool cleanup_playlist(playlist *playlist)
 {
    int i;
    if(playlist->tracks!=NULL)
@@ -213,6 +213,8 @@ bool cleanup_playlist(playlist *playlist)
                free(playlist->tracks[i]->game_name);
             if(playlist->tracks[i]->track_name != NULL)
                free(playlist->tracks[i]->track_name);
+            if(playlist->tracks[i]->author != NULL)
+               free(playlist->tracks[i]->author);
             free(playlist->tracks[i]);
          }
       }

@@ -7,13 +7,13 @@ CORE_DIR       := .
 ifeq ($(platform),)
 platform = unix
 ifeq ($(shell uname -a),)
-   platform = win
+	platform = win
 else ifneq ($(findstring MINGW,$(shell uname -a)),)
-   platform = win
+	platform = win
 else ifneq ($(findstring Darwin,$(shell uname -a)),)
-   platform = osx
+	platform = osx
 else ifneq ($(findstring win,$(shell uname -a)),)
-   platform = win
+	platform = win
 endif
 endif
 
@@ -47,17 +47,17 @@ else ifeq ($(platform), osx)
 	SHARED := -dynamiclib
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
-   ifeq ($(OSX_LT_MAVERICKS),YES)
-   	   fpic += -mmacosx-version-min=10.1
-   endif
+	ifeq ($(OSX_LT_MAVERICKS),YES)
+			fpic += -mmacosx-version-min=10.1
+	endif
 
-   ifeq ($(CROSS_COMPILE),1)
+	ifeq ($(CROSS_COMPILE),1)
 		TARGET_RULE   = -target $(LIBRETRO_APPLE_PLATFORM) -isysroot $(LIBRETRO_APPLE_ISYSROOT)
 		CFLAGS   += $(TARGET_RULE)
 		CPPFLAGS += $(TARGET_RULE)
 		CXXFLAGS += $(TARGET_RULE)
 		LDFLAGS  += $(TARGET_RULE)
-   endif
+	endif
 
 # iOS
 else ifneq (,$(findstring ios,$(platform)))
@@ -124,15 +124,15 @@ else ifeq ($(platform), qnx)
 	CXXFLAGS += -D__BLACKBERRY_QNX__
 	CXXFLAGS += -DARM
 else ifeq ($(platform), psp1)
-   TARGET := $(TARGET_NAME)_libretro_psp1.a
-   CC = psp-gcc
-   CXX = psp-g++
-   AR = psp-ar
-   CFLAGS += -DPSP -G0 -DIOAPI_NO_64
-   CFLAGS += -I$(shell psp-config --pspsdk-path)/include
-   CXXFLAGS += -DPSP -G0 -DIOAPI_NO_64
-   CXXFLAGS += -I$(shell psp-config --pspsdk-path)/include
-   STATIC_LINKING = 1
+	TARGET := $(TARGET_NAME)_libretro_psp1.a
+	CC = psp-gcc
+	CXX = psp-g++
+	AR = psp-ar
+	CFLAGS += -DPSP -G0 -DIOAPI_NO_64
+	CFLAGS += -I$(shell psp-config --pspsdk-path)/include
+	CXXFLAGS += -DPSP -G0 -DIOAPI_NO_64
+	CXXFLAGS += -I$(shell psp-config --pspsdk-path)/include
+	STATIC_LINKING = 1
 # Vita
 else ifeq ($(platform), vita)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
@@ -169,29 +169,29 @@ else ifeq ($(platform), xenon)
 
 # CTR(3DS)
 else ifeq ($(platform), ctr)
-   TARGET := $(TARGET_NAME)_libretro_$(platform).a
-   CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
-   CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
-   AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
-   CXXFLAGS += -DARM11 -D_3DS -DIOAPI_NO_64
-   CXXFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
-   CFLAGS += -DARM11 -D_3DS -DIOAPI_NO_64
-   CFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
-   STATIC_LINKING = 1
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = $(DEVKITARM)/bin/arm-none-eabi-gcc$(EXE_EXT)
+	CXX = $(DEVKITARM)/bin/arm-none-eabi-g++$(EXE_EXT)
+	AR = $(DEVKITARM)/bin/arm-none-eabi-ar$(EXE_EXT)
+	CXXFLAGS += -DARM11 -D_3DS -DIOAPI_NO_64
+	CXXFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
+	CFLAGS += -DARM11 -D_3DS -DIOAPI_NO_64
+	CFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
+	STATIC_LINKING = 1
 
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
-    include $(DEVKITPRO)/libnx/switch_rules
-    EXT=a
-    TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
-    DEFINES := -DSWITCH=1 -U__linux__ -U__linux -DRARCH_INTERNAL -DIOAPI_NO_64
-    CFLAGS	:=	 $(DEFINES) -g -O3 \
-                 -fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec -Wl,--allow-multiple-definition -specs=$(LIBNX)/switch.specs
-    CFLAGS += $(INCDIRS)
-    CFLAGS	+=	-D__SWITCH__ -DHAVE_LIBNX -march=armv8-a -mtune=cortex-a57 -mtp=soft
-    CXXFLAGS := $(ASFLAGS) $(CFLAGS) -fno-rtti -std=gnu++11
-    CFLAGS += -std=gnu11
-    STATIC_LINKING = 1
+	 include $(DEVKITPRO)/libnx/switch_rules
+	 EXT=a
+	 TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
+	 DEFINES := -DSWITCH=1 -U__linux__ -U__linux -DRARCH_INTERNAL -DIOAPI_NO_64
+	 CFLAGS	:=	 $(DEFINES) -g -O3 \
+					  -fPIE -I$(LIBNX)/include/ -ffunction-sections -fdata-sections -ftls-model=local-exec -Wl,--allow-multiple-definition -specs=$(LIBNX)/switch.specs
+	 CFLAGS += $(INCDIRS)
+	 CFLAGS	+=	-D__SWITCH__ -DHAVE_LIBNX -march=armv8-a -mtune=cortex-a57 -mtp=soft
+	 CXXFLAGS := $(ASFLAGS) $(CFLAGS) -fno-rtti -std=gnu++11
+	 CFLAGS += -std=gnu11
+	 STATIC_LINKING = 1
 
 # Nintendo Game Cube / Wii / WiiU
 else ifneq (,$(filter $(platform), ngc wii wiiu))
@@ -214,9 +214,9 @@ else ifneq (,$(filter $(platform), ngc wii wiiu))
 # Nintendo Switch (libtransistor)
 else ifeq ($(platform), switch)
 	EXT=a
-        TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
-        include $(LIBTRANSISTOR_HOME)/libtransistor.mk
-        STATIC_LINKING=1
+			TARGET := $(TARGET_NAME)_libretro_$(platform).$(EXT)
+			include $(LIBTRANSISTOR_HOME)/libtransistor.mk
+			STATIC_LINKING=1
 
 # ARM
 else ifneq (,$(findstring armv,$(platform)))
@@ -370,10 +370,10 @@ STATIC_LINKING=1
 # Windows MSVC 2017 all architectures
 else ifneq (,$(findstring windows_msvc2017,$(platform)))
 
-    NO_GCC := 1
-    CFLAGS += -DNOMINMAX
-    CXXFLAGS += -DNOMINMAX
-    WINDOWS_VERSION = 1
+	 NO_GCC := 1
+	 CFLAGS += -DNOMINMAX
+	 CXXFLAGS += -DNOMINMAX
+	 WINDOWS_VERSION = 1
 
 	PlatformSuffix = $(subst windows_msvc2017_,,$(platform))
 	ifneq (,$(findstring desktop,$(PlatformSuffix)))
@@ -455,7 +455,7 @@ else ifneq (,$(findstring windows_msvc2017,$(platform)))
 	ifneq (,$(findstring uwp,$(PlatformSuffix)))
 		LIB := $(LIB);$(shell IFS=$$'\n'; cygpath -w "$(LIB)/store")
 	endif
-    
+
 	export INCLUDE := $(INCLUDE);$(WindowsSDKSharedIncludeDir);$(WindowsSDKUCRTIncludeDir);$(WindowsSDKUMIncludeDir)
 	export LIB := $(LIB);$(WindowsSDKUCRTLibDir);$(WindowsSDKUMLibDir)
 	TARGET := $(TARGET_NAME)_libretro.dll
@@ -504,8 +504,8 @@ INFO = $(TARGET_NAME)_libretro.info
 
 OBJECTS := $(SOURCES_CXX:.cpp=.o) $(SOURCES_C:.c=.o)
 
-OBJOUT   = -o 
-LINKOUT  = -o 
+OBJOUT   = -o
+LINKOUT  = -o
 
 ifneq (,$(findstring msvc,$(platform)))
 	OBJOUT = -Fo

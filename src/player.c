@@ -26,9 +26,9 @@ bool is_emu_loaded(void)
 
 bool open_file(const char *path, long sample_rate)
 {
-   sample_rate_  = sample_rate;
-   current_track = 0;
-   prev_fileid   = -1;
+   sample_rate_   = sample_rate;
+   current_track  = 0;
+   prev_fileid    = -1;
 
    if(get_playlist(path,&plist))
    {
@@ -40,10 +40,10 @@ bool open_file(const char *path, long sample_rate)
 
 void close_file(void)
 {
-	gme_delete(emu);
-	emu = NULL;
-	if(plist!=NULL)
-		cleanup_playlist(plist);
+   gme_delete(emu);
+   emu = NULL;
+   if(plist!=NULL)
+      cleanup_playlist(plist);
 }
 
 void start_track(int tracknr)
@@ -70,7 +70,7 @@ void start_track(int tracknr)
    else
    {
       log_cb(RETRO_LOG_ERROR, "[GME] Error: Unknown track type.\n" );
-      is_playing_ = false;				
+      is_playing_ = false;
    }
    if (is_playing_)
       gme_start_track(emu, track->track_id);
@@ -97,8 +97,8 @@ short *play(void)
 
 void next_track(void)
 {
-	if(current_track< (plist->num_tracks-1))
-		start_track(++current_track);
+   if(current_track< (plist->num_tracks-1))
+      start_track(++current_track);
 }
 
 void prev_track(void)
@@ -127,20 +127,20 @@ void mute_voice(int index)
 
 char *get_game_name(char *buf)
 {
-	sprintf(buf, "%s",track->game_name);
-	return buf;
+   sprintf(buf, "%s",track->game_name);
+   return buf;
 }
 
 char *get_track_count(char *buf)
 {
-	sprintf(buf, "%d/%d",current_track+1,plist->num_tracks);
-	return buf;
+   sprintf(buf, "%d/%d",current_track+1,plist->num_tracks);
+   return buf;
 }
 
 char *get_song_name(char *buf)
 {
-	sprintf(buf, "%s",track->track_name);
-	return buf;
+   sprintf(buf, "%s",track->track_name);
+   return buf;
 }
 
 char *get_author(char *buf)

@@ -260,7 +260,7 @@ void retro_run(void)
 
    if(input & (1<<RETRO_DEVICE_ID_JOYPAD_B))
       mute_voice(selected_voice);
-   
+
    if(input & (1<<RETRO_DEVICE_ID_JOYPAD_LEFT))
       selected_voice = (selected_voice-1) % get_num_voices();
 
