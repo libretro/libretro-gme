@@ -179,6 +179,16 @@ else ifeq ($(platform), ctr)
    CFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
    STATIC_LINKING = 1
 
+# PS2
+else ifeq ($(platform), ps2)
+	TARGET := $(TARGET_NAME)_libretro_$(platform).a
+	CC = mips64r5900el-ps2-elf-gcc
+	CXX = mips64r5900el-ps2-elf-g++
+	AR = mips64r5900el-ps2-elf-ar
+	CFLAGS += -G0 -DPS2 -DABGR1555
+	CXXFLAGS += -G0 -DPS2 -DABGR1555
+	STATIC_LINKING=1
+
 # Nintendo Switch (libnx)
 else ifeq ($(platform), libnx)
     include $(DEVKITPRO)/libnx/switch_rules
