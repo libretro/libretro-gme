@@ -6,7 +6,11 @@
 
 unsigned short get_color(char r, char g, char b)
 {
+#ifdef ABGR1555
+   return (b << 10) | ((g & ~1) << 4) | r;
+#else
    return (r << 11) | (g << 5) | b;
+#endif
 }
 
 surface *create_surface(unsigned int width, unsigned int height, unsigned int bpp)
