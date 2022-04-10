@@ -104,6 +104,10 @@ include:
   - project: 'libretro-infrastructure/ci-templates'
     file: '/tvos-arm64.yml'
 
+  # OpenDingux (ARM)
+  - project: 'libretro-infrastructure/ci-templates'
+    file: '/dingux-arm32.yml'
+
   #################################### MISC ##################################
   # Emscripten
   - project: 'libretro-infrastructure/ci-templates'
@@ -270,6 +274,12 @@ libretro-build-wiiu:
 libretro-build-libnx-aarch64:
   extends:
     - .libretro-libnx-static-retroarch-master
+    - .core-defs
+
+# Miyoo
+libretro-build-miyoo-arm32:
+  extends:
+    - .libretro-miyoo-arm32-make-default
     - .core-defs
 
 #################################### MISC ##################################

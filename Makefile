@@ -252,6 +252,17 @@ else ifneq (,$(findstring armv,$(platform)))
 	endif
 	CXXFLAGS += -DARM
 
+# Miyoo
+else ifeq ($(platform), miyoo)
+	TARGET := $(TARGET_NAME)_libretro.so
+	CC = /opt/miyoo/usr/bin/arm-linux-gcc
+	CXX = /opt/miyoo/usr/bin/arm-linux-g++
+	AR = /opt/miyoo/usr/bin/arm-linux-ar
+	LDFLAGS += -shared -Wl,--version-script=link.T
+	fpic := -fPIC
+	CFLAGS += -O2 -mcpu=arm926ej-s
+	CXXFLAGS += -O2 -mcpu=arm926ej-s
+
 else ifeq ($(platform), emscripten)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).bc
 	STATIC_LINKING = 1
