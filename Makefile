@@ -179,6 +179,40 @@ else ifeq ($(platform), ctr)
    CFLAGS += -march=armv6k -mtune=mpcore -mfloat-abi=hard
    STATIC_LINKING = 1
 
+# GCW0
+else ifeq ($(platform), gcw0)
+	TARGET := $(TARGET_NAME)_libretro.so
+	CC = /opt/gcw0-toolchain/usr/bin/mipsel-linux-gcc
+	CXX = /opt/gcw0-toolchain/usr/bin/mipsel-linux-g++
+	AR = /opt/gcw0-toolchain/usr/bin/mipsel-linux-ar
+	fpic := -fPIC
+	LDFLAGS += -shared -Wl,--version-script=link.T -Wl,-no-undefined
+	CFLAGS += -march=mips32 -mtune=mips32r2 -mhard-float
+	CXXFLAGS += -march=mips32 -mtune=mips32r2 -mhard-float
+
+# RETROFW
+else ifeq ($(platform), retrofw)
+	EXT ?= so
+	TARGET := $(TARGET_NAME)_libretro.$(EXT)
+	CC = /opt/retrofw-toolchain/usr/bin/mipsel-linux-gcc
+	CXX = /opt/retrofw-toolchain/usr/bin/mipsel-linux-g++
+	AR = /opt/retrofw-toolchain/usr/bin/mipsel-linux-ar
+	fpic := -fPIC
+	LDFLAGS += -shared -Wl,--version-script=$(CORE_DIR)/link.T -Wl,--no-undefined
+	CFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+	CXXFLAGS += -ffast-math -march=mips32 -mtune=mips32 -mhard-float
+
+# RS90
+else ifeq ($(platform), rs90)
+   TARGET := $(TARGET_NAME)_libretro.so
+   CC = /opt/rs90-toolchain/usr/bin/mipsel-linux-gcc
+   CXX = /opt/rs90-toolchain/usr/bin/mipsel-linux-g++
+   AR = /opt/rs90-toolchain/usr/bin/mipsel-linux-ar
+   fpic := -fPIC
+   LDFLAGS += -shared -Wl,-version-script=$(CORE_DIR)/link.T
+   CFLAGS += -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32
+   CXXFLAGS += -fomit-frame-pointer -ffast-math -march=mips32 -mtune=mips32
+
 # PS2
 else ifeq ($(platform), ps2)
 	TARGET := $(TARGET_NAME)_libretro_$(platform).a
