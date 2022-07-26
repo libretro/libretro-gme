@@ -45,6 +45,7 @@ else ifeq ($(platform), osx)
 	TARGET := $(TARGET_NAME)_libretro.dylib
 	fpic := -fPIC -stdlib=libc++
 	SHARED := -dynamiclib
+        LDFLAGS += -stdlib=libc++
 	OSXVER = `sw_vers -productVersion | cut -d. -f 2`
 	OSX_LT_MAVERICKS = `(( $(OSXVER) <= 9)) && echo "YES"`
    ifeq ($(OSX_LT_MAVERICKS),YES)
