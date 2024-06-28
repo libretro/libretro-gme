@@ -250,6 +250,7 @@ else ifneq (,$(filter $(platform), ngc wii wiiu))
 	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
 	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
 	FLAGS := -DGEKKO -mcpu=750 -meabi -mhard-float -DIOAPI_NO_64
+	FLAGS := -ffunction-sections -fdata-sections -D__wiiu__ -D__wut__
 	STATIC_LINKING = 1
 	ifneq (,$(findstring wiiu,$(platform)))
 		FLAGS += -DWIIU -DHW_RVL
