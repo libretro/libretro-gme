@@ -263,6 +263,9 @@ void retro_run(void)
 
    if(input & (1<<RETRO_DEVICE_ID_JOYPAD_LEFT))
       selected_voice = (selected_voice-1) % get_num_voices();
+      if(selected_voice < 0){
+         selected_voice = get_num_voices() - 1;
+      }
 
    if(input & (1<<RETRO_DEVICE_ID_JOYPAD_RIGHT))
       selected_voice = (selected_voice+1) % get_num_voices();
