@@ -108,6 +108,10 @@ else ifeq ($(platform), tvos-arm64)
 	CFLAGS += -DIOS
 	CXXFLAGS += -DIOS
 	CXXFLAGS += -DARM
+	CC       += -mappletvos-version-min=11.0
+	CXX      += -mappletvos-version-min=11.0
+	CFLAGS   += -mappletvos-version-min=11.0
+	CXXFLAGS += -mappletvos-version-min=11.0
 
 else ifeq ($(platform), theos_ios)
 DEPLOYMENT_IOSVERSION = 5.0
