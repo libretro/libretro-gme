@@ -43,6 +43,8 @@ void close_file(void)
 	emu = NULL;
 	if(plist!=NULL)
 		cleanup_playlist(plist);
+	plist = NULL;
+	track = NULL;
 }
 
 void start_track(int tracknr)
@@ -107,33 +109,48 @@ void prev_track(void)
 
 char *get_game_name(char *buf)
 {
-	sprintf(buf, "%s",track->game_name);
+	if (track)
+		sprintf(buf, "%s",track->game_name);
+	else
+		buf[0] = '\0';
 	return buf;
 }
 
 char *get_track_count(char *buf)
 {
-	sprintf(buf, "%d/%d",current_track+1,plist->num_tracks);
+	if (plist)
+		sprintf(buf, "%d/%d",current_track+1,plist->num_tracks);
+	else
+		buf[0] = '\0';
 	return buf;
 }
 
 char *get_song_name(char *buf)
 {
-	sprintf(buf, "%s",track->track_name);
+	if (track)
+		sprintf(buf, "%s",track->track_name);
+	else
+		buf[0] = '\0';
 	return buf;
 }
 
 char *get_track_position(char *buf)
 {
-   long seconds         = track->track_length / 1000;
-   long elapsed_seconds = gme_tell(emu)       / 1000;
-   sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
+   if (track && emu) {
+      long seconds         = track->track_length / 1000;
+      long elapsed_seconds = gme_tell(emu)       / 1000;
+      sprintf(buf, "(%ld:%02ld / %ld:%02ld)",elapsed_seconds/60,elapsed_seconds%60,seconds/60,seconds % 60);
+   } else {
+      buf[0] = '\0';
+   }
    return buf;
 }
 
 int get_track_elapsed_frames(void)
 {
-   return gme_tell_samples(emu) / 1470;
+   if (emu)
+      return gme_tell_samples(emu) / 1470;
+   return 0;
 }
 
 void play_pause(void)

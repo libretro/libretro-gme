@@ -158,7 +158,9 @@ void draw_string(surface *surf, unsigned short color, char* text, int pos_x, int
    int frame_delay = 2;
    int msglen = strlen(text);
    surface *clipped_surface = NULL;
-   surface *temp_surface    = create_surface((msglen*8),8,2);	
+   surface *temp_surface    = create_surface((msglen*8),8,2);
+   if (!temp_surface)
+      return;
 
    for(x=0;x<msglen;x++)
       draw_letter(temp_surface,color,text[x],(x*8),0);

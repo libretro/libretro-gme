@@ -46,6 +46,9 @@ bool get_playlist(const char *path, playlist **dest_pl)
    else
       goto error;
 
+   if (pl->num_tracks == 0)
+      goto error;
+
    *dest_pl = pl;
    return true;
 
